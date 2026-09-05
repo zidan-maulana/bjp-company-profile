@@ -1,0 +1,116 @@
+// Prisma Schema for Baruna Jaya Plastik Company Profile
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// 1. User Admin (Auth)
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  passwordHash  String
+  role          String    @default("ADMIN")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// 2. Layanan (Services)
+model Service {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  shortDesc   String
+  fullDesc    String
+  materials   String[]
+  maxCapacity String?
+  imageUrl    String?
+  orderIndex  Int       @default(0)
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([deletedAt])
+}
+
+// 3. Portofolio & Gambar (Multi-photo)
+model PortfolioItem {
+  id          String           @id @default(cuid())
+  slug        String           @unique
+  title       String
+  description String
+  material    String
+  category    String
+  clientName  String?
+  images      PortfolioImage[]
+  deletedAt   DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([deletedAt])
+}
+
+model PortfolioImage {
+  id              String        @id @default(cuid())
+  portfolioItemId String
+  portfolioItem   PortfolioItem @relation(fields: [portfolioItemId], references: [id], onDelete: Cascade)
+  imageUrl        String
+  caption         String?
+  orderIndex      Int           @default(0)
+  createdAt       DateTime      @default(now())
+}
+
+// 4. Inquiries / Leads (Form Kontak / Quote B2B)
+enum InquiryStatus {
+  NEW
+  CONTACTED
+  CLOSED
+}
+
+model Inquiry {
+  id           String        @id @default(cuid())
+  name         String
+  companyName  String?
+  email        String
+  phone        String
+  serviceType  String?
+  message      String
+  status       InquiryStatus @default(NEW)
+  internalNote String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([status])
+}
+
+// 5. Testimonial
+model Testimonial {
+  id          String   @id @default(cuid())
+  clientName  String
+  companyName String?
+  content     String
+  rating      Int?     @default(5)
+  isActive    Boolean  @default(true)
+  orderIndex  Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+// 6. Company Info (Singleton - 1 record untuk info kantor & about)
+model CompanyInfo {
+  id              Int      @id @default(1)
+  companyName     String   @default("Baruna Jaya Plastik")
+  tagline         String?
+  history         String
+  vision          String?
+  mission         String?
+  address         String
+  phone           String
+  email           String
+  operatingHours  String   @default("08.00 - 17.00")
+  googleMapsEmbed String?
+  updatedAt       DateTime @updatedAt
+}
