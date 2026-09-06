@@ -52,7 +52,7 @@ const NAV_ITEMS = [
     badge: null,
   },
   {
-    name: "Konten & Profil Website",
+    name: "Konten & Profil",
     href: "/admin/company",
     icon: Building2,
     badge: "CMS",
@@ -148,9 +148,9 @@ export default function AdminLayoutClient({ children, user }: AdminLayoutClientP
                         : "text-zinc-300 hover:text-white hover:bg-[#1A1A1A]"
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-zinc-400"}`} />
-                      <span>{item.name}</span>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-white" : "text-zinc-400"}`} />
+                      <span className="whitespace-nowrap">{item.name}</span>
                     </div>
                     {item.badge && (
                       <span className="px-1.5 py-0.5 text-[9px] font-mono bg-[#1A1A1A] text-orange-400 border border-[#2B2B2B] uppercase">
@@ -244,9 +244,9 @@ export default function AdminLayoutClient({ children, user }: AdminLayoutClientP
                               : "text-zinc-300 hover:text-white hover:bg-[#1A1A1A]"
                           }`}
                         >
-                          <div className="flex items-center gap-3">
-                            <Icon className="w-4 h-4" />
-                            <span>{item.name}</span>
+                          <div className="flex items-center gap-3 min-w-0">
+                            <Icon className="w-4 h-4 shrink-0" />
+                            <span className="whitespace-nowrap">{item.name}</span>
                           </div>
                           {item.badge && (
                             <span className="px-1.5 py-0.5 text-[9px] font-mono bg-[#1A1A1A] text-orange-400 border border-[#2B2B2B] uppercase">
