@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   Building2,
@@ -31,6 +32,7 @@ interface CompanyClientProps {
 }
 
 export default function CompanyClient({ initialInfo }: CompanyClientProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"profile" | "hero" | "about" | "standards">("profile");
 
   // Parse standard cards safe
@@ -171,6 +173,7 @@ export default function CompanyClient({ initialInfo }: CompanyClientProps) {
       const res = await updateCompanyInfoAction(payload);
       if (res.success) {
         setNotification({ text: "Seluruh konten website & profil berhasil disimpan dan diperbarui di landing page." });
+        router.refresh();
       } else {
         setNotification({ text: res.message || "Gagal menyimpan perubahan.", isError: true });
       }

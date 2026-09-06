@@ -37,6 +37,29 @@ export async function isDatabaseOnline(): Promise<boolean> {
     return globalForPrisma.dbAvailable;
   }
 
+  const dbUrl = process.env.DATABASE_URL || "";
+  const isLocalhost = dbUrl.includes("localhost") || dbUrl.includes("127.0.0.1");
+
+  // Jika remote database (seperti Neon PostgreSQL di Vercel) atau berjalan di lingkungan Vercel:
+  if (!isLocalhost || process.env.VERCEL || process.env.NODE_ENV === "production") {
+    try {
+      const probePromise = db.$queryRawUnsafe("SELECT 1");
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Database probe timeout")), 2500)
+      );
+
+      await Promise.race([probePromise, timeoutPromise]);
+      globalForPrisma.dbAvailable = true;
+      globalForPrisma.dbLastChecked = Date.now();
+      return true;
+    } catch {
+      globalForPrisma.dbAvailable = false;
+      globalForPrisma.dbLastChecked = Date.now();
+      return false;
+    }
+  }
+
+  // Jika localhost Docker di mesin development lokal: gunakan socket probe kilat 120ms
   return new Promise((resolve) => {
     const socket = new net.Socket();
     let isResolved = false;
