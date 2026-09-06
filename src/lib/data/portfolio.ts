@@ -174,7 +174,13 @@ export async function getActivePortfolio(categoryFilter?: string): Promise<Portf
         orderBy: { createdAt: "desc" },
       });
 
-      if (portfolio && portfolio.length > 0) {
+      if (portfolio) {
+        if (portfolio.length === 0 && (!categoryFilter || categoryFilter === "ALL")) {
+          const totalCount = await db.portfolioItem.count();
+          if (totalCount === 0) {
+            return DEFAULT_PORTFOLIO_ITEMS;
+          }
+        }
         return portfolio.map((item: any) => ({
           id: String(item.id),
           slug: item.slug || "",

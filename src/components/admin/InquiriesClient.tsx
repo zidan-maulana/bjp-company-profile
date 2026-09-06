@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Inbox,
   Search,
@@ -39,6 +40,7 @@ interface InquiriesClientProps {
 }
 
 export default function InquiriesClient({ initialInquiries }: InquiriesClientProps) {
+  const router = useRouter();
   const [inquiries, setInquiries] = useState<Inquiry[]>(initialInquiries);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
@@ -90,6 +92,7 @@ export default function InquiriesClient({ initialInquiries }: InquiriesClientPro
           });
         }
         setNotification({ text: "Status & catatan berhasil diperbarui." });
+        router.refresh();
       } else {
         setNotification({ text: res.message || "Gagal memperbarui status.", isError: true });
       }

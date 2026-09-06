@@ -11,11 +11,17 @@ export interface UploadResponse {
 
 const ALLOWED_MIME_TYPES = [
   "image/jpeg",
+  "image/jpg",
+  "image/pjpeg",
+  "image/jfif",
   "image/png",
+  "image/x-png",
   "image/webp",
   "image/gif",
   "image/svg+xml",
 ];
+
+const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "gif", "svg", "jfif"];
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -26,7 +32,11 @@ export async function uploadImageAction(formData: FormData): Promise<UploadRespo
       return { success: false, error: "File tidak ditemukan dalam form data." };
     }
 
-    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const isMimeValid = ALLOWED_MIME_TYPES.includes(file.type);
+    const isExtValid = ALLOWED_EXTENSIONS.includes(ext);
+
+    if (!isMimeValid && !isExtValid) {
       return {
         success: false,
         error: "Format file tidak didukung. Harap gunakan format JPG, PNG, WebP, GIF, atau SVG.",
@@ -37,36 +47,45 @@ export async function uploadImageAction(formData: FormData): Promise<UploadRespo
       return { success: false, error: "Ukuran file melebihi batas maksimal 5MB." };
     }
 
-    if (!isR2Configured || !r2Client) {
-      return {
-        success: false,
-        error: "Cloudflare R2 belum dikonfigurasi di .env (R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY).",
-      };
-    }
-
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const ext = file.name.split(".").pop() || "webp";
-    const cleanExt = ext.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
-    const key = `uploads/${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${cleanExt}`;
+    const mimeType = file.type || (ext === "png" ? "image/png" : ext === "webp" ? "image/webp" : "image/jpeg");
 
-    await r2Client.send(
-      new PutObjectCommand({
-        Bucket: R2_BUCKET_NAME,
-        Key: key,
-        Body: buffer,
-        ContentType: file.type,
-      })
-    );
+    // Jika Cloudflare R2 terkonfigurasi, unggah ke Cloudflare R2
+    if (isR2Configured && r2Client) {
+      try {
+        const cleanExt = ext || "jpg";
+        const key = `uploads/${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${cleanExt}`;
 
-    const publicUrl = R2_PUBLIC_URL
-      ? `${R2_PUBLIC_URL.replace(/\/$/, "")}/${key}`
-      : `https://${R2_BUCKET_NAME}.r2.dev/${key}`;
+        await r2Client.send(
+          new PutObjectCommand({
+            Bucket: R2_BUCKET_NAME,
+            Key: key,
+            Body: buffer,
+            ContentType: mimeType,
+          })
+        );
 
-    return { success: true, url: publicUrl };
+        const publicUrl = R2_PUBLIC_URL
+          ? `${R2_PUBLIC_URL.replace(/\/$/, "")}/${key}`
+          : `https://${R2_BUCKET_NAME}.r2.dev/${key}`;
+
+        return { success: true, url: publicUrl };
+      } catch (r2Err) {
+        console.warn("R2 Upload failed, falling back to database DataURL storage:", r2Err);
+        // Fallback ke Base64 Data URL agar simpan data tetap berhasil 100%
+        const base64 = buffer.toString("base64");
+        return { success: true, url: `data:${mimeType};base64,${base64}` };
+      }
+    }
+
+    // Jika R2 belum dikonfigurasi, gunakan Base64 Data URL
+    const base64 = buffer.toString("base64");
+    return { success: true, url: `data:${mimeType};base64,${base64}` };
   } catch (err: unknown) {
-    const errorMessage = err instanceof Error ? err.message : "Gagal mengunggah gambar ke Cloudflare R2.";
-    console.error("Upload to R2 error:", err);
+    const errorMessage = err instanceof Error ? err.message : "Gagal memproses unggahan foto.";
+    console.error("Upload error:", err);
     return { success: false, error: errorMessage };
   }
 }
+

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   FolderKanban,
@@ -59,6 +60,7 @@ const CATEGORIES = [
 ];
 
 export default function PortfolioClient({ initialItems }: PortfolioClientProps) {
+  const router = useRouter();
   const [items, setItems] = useState<PortfolioItem[]>(initialItems);
   const [activeCategory, setActiveCategory] = useState("ALL");
   const [modalOpen, setModalOpen] = useState(false);
@@ -152,16 +154,19 @@ export default function PortfolioClient({ initialItems }: PortfolioClientProps) 
         uploadData.append("file", selectedFile);
         const uploadRes = await uploadImageAction(uploadData);
 
-        if (!uploadRes.success || !uploadRes.url) {
+        if (uploadRes.success && uploadRes.url) {
+          finalImageUrl = uploadRes.url;
+        } else if (imageUrl) {
+          // Gunakan Base64 data URL hasil FileReader jika upload service sedang timeout
+          finalImageUrl = imageUrl;
+        } else {
           setNotification({
-            text: uploadRes.error || "Gagal mengunggah foto cetakan ke Cloudflare R2.",
+            text: uploadRes.error || "Gagal memproses foto cetakan.",
             isError: true,
           });
           setIsLoading(false);
           return;
         }
-
-        finalImageUrl = uploadRes.url;
       }
 
       const payload: PortfolioItemInput = {
@@ -188,6 +193,7 @@ export default function PortfolioClient({ initialItems }: PortfolioClientProps) 
           );
           setNotification({ text: `Portofolio "${title}" berhasil diperbarui.` });
           setModalOpen(false);
+          router.refresh();
         } else {
           setNotification({ text: res.message || "Gagal memperbarui portofolio.", isError: true });
         }
@@ -197,6 +203,7 @@ export default function PortfolioClient({ initialItems }: PortfolioClientProps) 
           setItems((prev) => [res.data as unknown as PortfolioItem, ...prev]);
           setNotification({ text: "Portofolio cetakan baru berhasil ditambahkan." });
           setModalOpen(false);
+          router.refresh();
         } else {
           setNotification({ text: res.message || "Gagal membuat portofolio.", isError: true });
         }
@@ -216,6 +223,7 @@ export default function PortfolioClient({ initialItems }: PortfolioClientProps) 
         if (res.success) {
           setItems((prev) => prev.filter((item) => item.id !== id));
           setNotification({ text: `Portofolio "${name}" berhasil dihapus.` });
+          router.refresh();
         } else {
           setNotification({ text: res.message || "Gagal menghapus.", isError: true });
         }

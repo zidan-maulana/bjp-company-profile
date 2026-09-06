@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Layers,
   Plus,
@@ -38,6 +39,7 @@ interface ServicesClientProps {
 }
 
 export default function ServicesClient({ initialServices }: ServicesClientProps) {
+  const router = useRouter();
   const [services, setServices] = useState<Service[]>(initialServices);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
@@ -60,11 +62,12 @@ export default function ServicesClient({ initialServices }: ServicesClientProps)
     setMaterialsStr("");
     setMaxCapacity("");
     setImageUrl("");
-    setOrderIndex(services.length);
+    setOrderIndex(0);
     setEditingService(null);
   };
 
   const handleOpenAdd = () => {
+    setEditingService(null);
     resetForm();
     setModalOpen(true);
     setNotification(null);
@@ -112,6 +115,7 @@ export default function ServicesClient({ initialServices }: ServicesClientProps)
           );
           setNotification({ text: "Layanan berhasil diperbarui." });
           setModalOpen(false);
+          router.refresh();
         } else {
           setNotification({ text: res.message || "Gagal mengupdate layanan.", isError: true });
         }
@@ -121,6 +125,7 @@ export default function ServicesClient({ initialServices }: ServicesClientProps)
           setServices((prev) => [...prev, res.data as Service]);
           setNotification({ text: "Layanan baru berhasil ditambahkan." });
           setModalOpen(false);
+          router.refresh();
         } else {
           setNotification({ text: res.message || "Gagal menambah layanan.", isError: true });
         }
@@ -140,6 +145,7 @@ export default function ServicesClient({ initialServices }: ServicesClientProps)
         if (res.success) {
           setServices((prev) => prev.filter((s) => s.id !== id));
           setNotification({ text: `Layanan "${name}" berhasil dihapus.` });
+          router.refresh();
         } else {
           setNotification({ text: res.message || "Gagal menghapus.", isError: true });
         }
