@@ -167,7 +167,7 @@ export async function getActiveServices(): Promise<ServiceItemData[]> {
       });
 
       if (services && services.length > 0) {
-        return services.map((s, idx) => ({
+        return services.map((s: any, idx: number) => ({
           id: s.id,
           slug: s.slug,
           number: String(idx + 1).padStart(2, "0"),

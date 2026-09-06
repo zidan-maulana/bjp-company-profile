@@ -21,6 +21,7 @@ import {
   updatePortfolioAction,
   softDeletePortfolioAction,
 } from "@/actions/portfolio";
+import { uploadImageAction } from "@/actions/upload";
 import { PortfolioItemInput } from "@/lib/validations/portfolio";
 import AdminHeaderActions from "./AdminHeaderActions";
 
@@ -74,6 +75,7 @@ export default function PortfolioClient({ initialItems }: PortfolioClientProps) 
   const [imageUrl, setImageUrl] = useState("");
   const [imageFileName, setImageFileName] = useState("");
   const [caption, setCaption] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredItems = items.filter(
@@ -89,11 +91,13 @@ export default function PortfolioClient({ initialItems }: PortfolioClientProps) 
       return;
     }
 
+    setSelectedFile(file);
+    setImageFileName(file.name);
+
     const reader = new FileReader();
     reader.onload = () => {
       if (typeof reader.result === "string") {
         setImageUrl(reader.result);
-        setImageFileName(file.name);
       }
     };
     reader.readAsDataURL(file);
@@ -108,6 +112,7 @@ export default function PortfolioClient({ initialItems }: PortfolioClientProps) 
     setImageUrl("");
     setImageFileName("");
     setCaption("");
+    setSelectedFile(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -129,6 +134,7 @@ export default function PortfolioClient({ initialItems }: PortfolioClientProps) 
     setImageUrl(currentImg);
     setImageFileName(currentImg ? "Foto Dokumentasi Tersimpan" : "");
     setCaption(item.images?.[0]?.caption || item.title);
+    setSelectedFile(null);
     setModalOpen(true);
     setNotification(null);
   };
@@ -138,22 +144,41 @@ export default function PortfolioClient({ initialItems }: PortfolioClientProps) 
     setIsLoading(true);
     setNotification(null);
 
-    const payload: PortfolioItemInput = {
-      title,
-      category,
-      material,
-      clientName: clientName || undefined,
-      description,
-      images: [
-        {
-          imageUrl: imageUrl || "/hero-bg.webp",
-          caption: caption || title,
-          orderIndex: 0,
-        },
-      ],
-    };
-
     try {
+      let finalImageUrl = imageUrl || "/hero-bg.webp";
+
+      if (selectedFile) {
+        const uploadData = new FormData();
+        uploadData.append("file", selectedFile);
+        const uploadRes = await uploadImageAction(uploadData);
+
+        if (!uploadRes.success || !uploadRes.url) {
+          setNotification({
+            text: uploadRes.error || "Gagal mengunggah foto cetakan ke Cloudflare R2.",
+            isError: true,
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        finalImageUrl = uploadRes.url;
+      }
+
+      const payload: PortfolioItemInput = {
+        title,
+        category,
+        material,
+        clientName: clientName || undefined,
+        description,
+        images: [
+          {
+            imageUrl: finalImageUrl,
+            caption: caption || title,
+            orderIndex: 0,
+          },
+        ],
+      };
+
       if (editingItem) {
         const res = await updatePortfolioAction(editingItem.id, payload);
         if (res.success && res.data) {
@@ -472,6 +497,7 @@ export default function PortfolioClient({ initialItems }: PortfolioClientProps) 
                         onClick={() => {
                           setImageUrl("");
                           setImageFileName("");
+                          setSelectedFile(null);
                           if (fileInputRef.current) fileInputRef.current.value = "";
                         }}
                         title="Hapus foto"

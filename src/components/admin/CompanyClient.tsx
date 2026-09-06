@@ -22,6 +22,7 @@ import {
   Layers,
 } from "lucide-react";
 import { updateCompanyInfoAction } from "@/actions/company";
+import { uploadImageAction } from "@/actions/upload";
 import { CompanyInfoData, DEFAULT_STANDARDS_CARDS, StandardCard } from "@/lib/data/types";
 import AdminHeaderActions from "./AdminHeaderActions";
 
@@ -88,6 +89,7 @@ export default function CompanyClient({ initialInfo }: CompanyClientProps) {
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploadingBg, setIsUploadingBg] = useState(false);
   const [notification, setNotification] = useState<{ text: string; isError?: boolean } | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -96,7 +98,7 @@ export default function CompanyClient({ initialInfo }: CompanyClientProps) {
   };
 
   // Image Upload Handler
-  const handleHeroBgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleHeroBgUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -105,11 +107,33 @@ export default function CompanyClient({ initialInfo }: CompanyClientProps) {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setFormData((prev) => ({ ...prev, heroBgImage: reader.result as string }));
-    };
-    reader.readAsDataURL(file);
+    // Tampilkan preview instan
+    const previewUrl = URL.createObjectURL(file);
+    setFormData((prev) => ({ ...prev, heroBgImage: previewUrl }));
+
+    setIsUploadingBg(true);
+    setNotification(null);
+
+    try {
+      const uploadData = new FormData();
+      uploadData.append("file", file);
+      const res = await uploadImageAction(uploadData);
+
+      if (res.success && res.url) {
+        setFormData((prev) => ({ ...prev, heroBgImage: res.url as string }));
+        setNotification({ text: "Foto Hero background berhasil diunggah ke Cloudflare R2." });
+      } else {
+        setNotification({
+          text: res.error || "Gagal mengunggah foto ke Cloudflare R2.",
+          isError: true,
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      setNotification({ text: "Terjadi gangguan saat mengunggah foto.", isError: true });
+    } finally {
+      setIsUploadingBg(false);
+    }
   };
 
   const handleResetHeroBg = () => {
@@ -455,12 +479,22 @@ export default function CompanyClient({ initialInfo }: CompanyClientProps) {
                   </div>
 
                   <div className="space-y-2.5 pt-2 border-t border-[#262626]">
-                    <label className="w-full h-10 bg-orange-600 hover:bg-orange-500 text-white text-xs font-mono uppercase tracking-wider font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-md">
-                      <Upload className="w-4 h-4" />
-                      <span>Unggah Foto Baru</span>
+                    <label className={`w-full h-10 ${isUploadingBg ? "bg-orange-800 cursor-not-allowed opacity-80" : "bg-orange-600 hover:bg-orange-500 cursor-pointer"} text-white text-xs font-mono uppercase tracking-wider font-semibold flex items-center justify-center gap-2 transition-colors shadow-md`}>
+                      {isUploadingBg ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Mengunggah ke R2...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-4 h-4" />
+                          <span>Unggah Foto Baru</span>
+                        </>
+                      )}
                       <input
                         type="file"
                         accept="image/*"
+                        disabled={isUploadingBg}
                         onChange={handleHeroBgUpload}
                         className="hidden"
                       />
