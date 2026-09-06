@@ -99,7 +99,7 @@ model Testimonial {
   createdAt   DateTime @default(now())
 }
 
-// 6. Company Info (Singleton - 1 record untuk info kantor & about)
+// 6. Company Info & Site Content (Singleton - 1 record untuk info kantor, kontak & konten website)
 model CompanyInfo {
   id              Int      @id @default(1)
   companyName     String   @default("Baruna Jaya Plastik")
@@ -112,5 +112,26 @@ model CompanyInfo {
   email           String
   operatingHours  String   @default("08.00 - 17.00")
   googleMapsEmbed String?
+
+  // Hero Section
+  heroBgImage        String?  @db.Text
+  heroHeadlineLine1  String?
+  heroHeadlineLine2  String?
+  heroStat1Value     String?
+  heroStat1Label     String?
+  heroStat2Value     String?
+  heroStat2Label     String?
+  heroSpecDesc       String?  @db.Text
+
+  // About / Story Section
+  aboutEyebrow       String?
+  aboutStatement     String?  @db.Text
+
+  // Standards Section
+  standardsEyebrow   String?
+  standardsTitle     String?
+  standardsEditorial String?  @db.Text
+  standardsCards     String?  @db.Text
+
   updatedAt       DateTime @updatedAt
 }

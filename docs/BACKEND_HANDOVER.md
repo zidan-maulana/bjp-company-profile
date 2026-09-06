@@ -114,9 +114,13 @@ erDiagram
 * **Validasi Form Client-Side**: Gunakan Zod schema yang sudah dibuat di `@/lib/validations/*` bersama `react-hook-form` & `@hookform/resolvers/zod`.
 * **Dokumentasi Lengkap API**: Rincian contoh *code* fetching dan submit form sudah tersedia di dokumen `api_documentation_for_fe.md`.
 
-### B. Untuk Haikal (Content, SEO & Deployment)
-* **Seed Data**: Jika ada perbaikan teks dummy (visi-misi, testimoni, deskripsi baja), Haikal bisa langsung memperbarui file `prisma/seed.ts` atau mengedit via dashboard admin nanti.
-* **Environment Variables**: Saat setup Vercel & Neon DB, pastikan meng-copy variabel dari `.env.example`.
+### B. Untuk Haikal (Content, SEO, Storage R2 & Deployment)
+* **Storage Cloudflare R2 (Full Ownership)**:
+  * Setup Cloudflare Bucket R2 dan dapatkan API Token (Account ID, Access Key ID, Secret Access Key).
+  * Implementasikan upload handler / presigned URL S3 Client (`@aws-sdk/client-s3`) di backend/API Next.js.
+  * Hubungkan hasil upload URL CDN dari R2 langsung ke payload form admin (sehingga UI Zidan yang sudah menyediakan file input dan preview visual otomatis terhubung tanpa Zidan harus coding ulang).
+* **Seed Data**: Jika ada perbaikan teks dummy (visi-misi, testimoni, deskripsi baja), Haikal bisa langsung memperbarui file `prisma/seed.ts` atau mengedit via dashboard admin.
+* **Environment Variables & Deployment**: Saat setup Vercel & Live DB / Cloudflare R2, pastikan meng-copy dan mengisi seluruh variabel dari `.env.example`.
 
 ---
 
@@ -124,10 +128,10 @@ erDiagram
 
 Berikut adalah urutan kerja yang disarankan untuk melangkah ke tahap berikutnya:
 
-### Prioritas 1: Eksekusi Frontend oleh Zidan (Langsung Jalan)
-1. **Design System & Layout**: Setup komponen dasar (Navbar, Footer, Button, Card) berbasis shadcn/ui.
-2. **Halaman Publik**: Selesaikan tampilan Halaman Home, About, Services, Portfolio, dan Contact.
-3. **Integrasi Form**: Hubungkan form kontak publik dengan `submitInquiryAction`.
+### Prioritas 1: Eksekusi Frontend oleh Zidan (Fokus Selesai di UI/UX)
+1. **Design System & Layout**: Komponen dasar (Navbar, Footer, Button, Card, Tab Admin) sudah rapi.
+2. **Halaman Publik**: Tampilan Halaman Home, About, Services, Portfolio, dan Contact.
+3. **Form & Interaktivitas UI**: Input form, modal, visual preview gambar lokal, dan client validation. Zidan tidak dibebani implementasi R2.
 
 ### Prioritas 2: Setup Live Database & Auth Admin oleh Lukman
 1. **Provisioning DB**: Buat database PostgreSQL di Neon.tech (gratis), lalu masukkan string koneksi ke `.env`.
@@ -137,8 +141,7 @@ Berikut adalah urutan kerja yang disarankan untuk melangkah ke tahap berikutnya:
    npm run db:seed
    ```
 3. **Setup Auth Admin (NextAuth v5 / Database Session)**: Pasang proteksi middleware pada rute `/admin/*` agar hanya admin terautentikasi yang bisa masuk.
-4. **Upload Cloudflare R2**: Buat presigned URL generator untuk upload gambar multi-foto langsung dari browser ke R2.
 
-### Prioritas 3: Admin UI & Deployment oleh Haikal & Tim
-1. **Admin Dashboard UI**: Buat halaman CRUD Services, Portfolio, Inquiry Status, dan Edit Company Info.
-2. **SEO & Deployment**: Pasang schema.org `LocalBusiness`, sitemap.xml, dan hubungkan domain Vercel.
+### Prioritas 3: Storage R2, Admin Hookup, & Deployment oleh Haikal
+1. **Cloudflare R2 Integration**: Buat bucket R2, pasang library `@aws-sdk/client-s3`, dan buat API endpoint upload/presigned URL untuk gambar media admin.
+2. **SEO & Deployment**: Pasang schema.org `LocalBusiness`, sitemap.xml, custom domain Vercel, dan SSL Cloudflare.

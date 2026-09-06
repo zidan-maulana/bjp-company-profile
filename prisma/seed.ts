@@ -90,59 +90,113 @@ async function main() {
   }
   console.log("Services seeded successfully.");
 
-  // 4. Seed Portfolio Items & Multi-Photos
-  const portfolioItem1 = await prisma.portfolioItem.upsert({
-    where: { slug: "mold-injeksi-tutup-galon-4-cavity" },
-    update: {},
-    create: {
-      slug: "mold-injeksi-tutup-galon-4-cavity",
-      title: "Mold Injeksi Tutup Galon 4-Cavity",
-      description:
-        "Cetakan injeksi plastik 4-cavity menggunakan material baja Stavax 2316 (hardened 48 HRC) tahan korosi. Didesain presisi untuk hasil drat rapat dan bebas kebocoran.",
-      material: "Baja Stavax 2316 (48 HRC)",
-      category: "Injection",
-      clientName: "Manufaktur Kemasan Plastik Jakarta",
-      images: {
-        create: [
-          {
-            imageUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=800&auto=format&fit=crop",
-            caption: "Tampilan permukaan core dan cavity mold tutup galon",
-            orderIndex: 1,
-          },
-          {
-            imageUrl: "https://images.unsplash.com/photo-1581092335397-9583fe92d232?q=80&w=800&auto=format&fit=crop",
-            caption: "Hasil sampel uji cetik produk plastik tutup galon",
-            orderIndex: 2,
-          },
-        ],
-      },
+  // 4. Seed Portfolio Items & Multi-Photos (8 Actual Landing Page Items)
+  const portfolioSeedData = [
+    {
+      slug: "mold-komponen-otomotif",
+      title: "Mold Komponen Otomotif",
+      description: "Cetakan injeksi presisi 8-cavity untuk komponen part otomotif interior & engine compartment dengan toleransi ketat.",
+      material: "Stavax 2316",
+      category: "Automotive",
+      clientName: "Manufaktur Otomotif Cikarang",
+      imageUrl: "/portfolio/original-automotive-mold.jpg",
     },
-  });
-
-  const portfolioItem2 = await prisma.portfolioItem.upsert({
-    where: { slug: "mold-blowing-botol-kemasan-500ml" },
-    update: {},
-    create: {
-      slug: "mold-blowing-botol-kemasan-500ml",
-      title: "Mold Blowing Botol Kemasan 500ml",
-      description:
-        "Cetakan blow molding untuk botol minuman 500ml menggunakan baja minyak 2311. Dilengkapi cooling jalur air terintegrasi untuk efisiensi pendinginan masal.",
-      material: "Baja Minyak 2311 (30 HRC)",
-      category: "Blowing",
-      clientName: "Pabrik Botol Plastik Tangerang",
-      images: {
-        create: [
-          {
-            imageUrl: "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?q=80&w=800&auto=format&fit=crop",
-            caption: "Blok mold blowing bagian kiri dan kanan",
-            orderIndex: 1,
-          },
-        ],
-      },
+    {
+      slug: "cetakan-botol-kosmetik",
+      title: "Cetakan Botol Kosmetik",
+      description: "Mold blowing botol kosmetik dan perawatan dengan finishing mirror polish untuk permukaan bening sempurna.",
+      material: "Baja 2311 (Mirror Polish)",
+      category: "Consumer Goods",
+      clientName: "Industri Kosmetik Tangerang",
+      imageUrl: "/portfolio/original-cosmetic-bottle-mold.jpg",
     },
-  });
+    {
+      slug: "housing-konektor-presisi",
+      title: "Housing Konektor Presisi",
+      description: "Mold injeksi micro-tolerance untuk electrical housing dan socket konektor dengan ketelitian dimensi ekstrem.",
+      material: "Baja Perkakas Presisi (±0.01mm)",
+      category: "Electronic & Appliances",
+      clientName: "Elektronik Manufaktur Bekasi",
+      imageUrl: "/portfolio/original-precision-connector-mold.jpg",
+    },
+    {
+      slug: "cetakan-alat-kesehatan",
+      title: "Cetakan Alat Kesehatan",
+      description: "Cetakan injeksi standar cleanroom medis untuk komponen syringe, tabung laboratorium, dan wadah steril.",
+      material: "Baja Stavax Tahan Korosi",
+      category: "Medical & Sanitary",
+      clientName: "Produsen Alat Medis Karawang",
+      imageUrl: "/portfolio/original-medical-cleanroom-mold.jpg",
+    },
+    {
+      slug: "wadah-makanan-thin-wall",
+      title: "Wadah Makanan Thin-Wall",
+      description: "Cetakan thin-wall container berkecepatan tinggi dengan hot-runner multi-drop untuk efisiensi siklus produksi massal.",
+      material: "Baja Fast Cycle (Hot Runner)",
+      category: "Food & Beverage",
+      clientName: "Food Packaging Industry",
+      imageUrl: "/portfolio/original-thinwall-food-mold.jpg",
+    },
+    {
+      slug: "insert-core-cavity-presisi",
+      title: "Insert Core & Cavity Presisi",
+      description: "Pembuatan core dan cavity insert khusus dengan permesinan CNC Wire EDM untuk part mekanikal industri rumit.",
+      material: "Baja Hardened HRC 52",
+      category: "Industrial",
+      clientName: "Tooling & Machine Partner",
+      imageUrl: "/portfolio/original-cnc-wire-edm-mold.jpg",
+    },
+    {
+      slug: "tutup-botol-flip-top-cap",
+      title: "Tutup Botol & Flip-Top Cap",
+      description: "Cetakan tutup galon & botol multi-cavity dengan mekanisme unscrewing otomatis untuk drat presisi bebas bocor.",
+      material: "Baja Stavax 16-Cavity",
+      category: "Food & Beverage",
+      clientName: "Beverage Cap Manufacturer",
+      imageUrl: "/portfolio/original-bottle-cap-closure-mold.jpg",
+    },
+    {
+      slug: "kemasan-jeriken-industri-5l",
+      title: "Kemasan Jeriken Industri 5L",
+      description: "Cetakan extrusion blow mold tangguh untuk jerigen kimia dan industri 5 Liter dengan ketebalan dinding merata.",
+      material: "Baja Air 1730 Heavy Duty",
+      category: "Industrial",
+      clientName: "Chemical Packaging Factory",
+      imageUrl: "/portfolio/original-industrial-jerrycan-mold-v2.jpg",
+    },
+  ];
 
-  console.log("Portfolio items seeded:", portfolioItem1.title, ",", portfolioItem2.title);
+  for (const item of portfolioSeedData) {
+    await prisma.portfolioItem.upsert({
+      where: { slug: item.slug },
+      update: {
+        title: item.title,
+        description: item.description,
+        material: item.material,
+        category: item.category,
+        clientName: item.clientName,
+      },
+      create: {
+        slug: item.slug,
+        title: item.title,
+        description: item.description,
+        material: item.material,
+        category: item.category,
+        clientName: item.clientName,
+        images: {
+          create: [
+            {
+              imageUrl: item.imageUrl,
+              caption: item.title,
+              orderIndex: 0,
+            },
+          ],
+        },
+      },
+    });
+  }
+
+  console.log("8 Portfolio items seeded successfully.");
 
   // 5. Seed Testimonials
   const testimonials = [

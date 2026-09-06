@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const portfolioImageSchema = z.object({
-  imageUrl: z.string().url("URL gambar tidak valid"),
+  imageUrl: z.string().min(1, "Foto dokumentasi cetakan wajib diisi"),
   caption: z.string().optional(),
   orderIndex: z.number().int().default(0),
 });

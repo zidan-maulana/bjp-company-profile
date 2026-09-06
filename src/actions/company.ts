@@ -1,66 +1,64 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { revalidatePath } from "next/cache";
+import { getCompanyInfo, saveCompanyInfoLocal, CompanyInfoData } from "@/lib/data/company";
 
 export async function getCompanyInfoAction() {
-  try {
-    let companyInfo = await db.companyInfo.findUnique({ where: { id: 1 } });
-    if (!companyInfo) {
-      companyInfo = await db.companyInfo.create({
-        data: {
-          id: 1,
-          companyName: "Baruna Jaya Plastik",
-          tagline: "Produsen Mold & Cetakan Plastic Injection & Blowing Presisi",
-          history: "Baruna Jaya Plastik berdiri sejak tahun 2001 di Kalideres, Jakarta Barat, berfokus pada pembuatan cetakan/mold presisi tinggi berbasis baja perkakas.",
-          vision: "Menjadi mitra manufaktur cetakan plastik terpercaya di Indonesia.",
-          mission: "Memberikan hasil mold presisi tinggi dengan daya tahan maksimal dan layanan service responsif.",
-          address: "Jl. Kampung Belakang RT 001/05 No. 37, depan SD 04 Kamal, Kel. Kamal, Kec. Kalideres, Jakarta Barat",
-          phone: "081283840614",
-          email: "barunajayaplastik.bjp@gmail.com",
-          operatingHours: "08.00 - 17.00 WIB",
-        },
-      });
-    }
-    return { success: true, data: companyInfo };
-  } catch (error) {
-    console.error("Error fetching company info:", error);
-    return { success: false, data: null };
-  }
+  const data = await getCompanyInfo();
+  return { success: true, data };
 }
 
-export async function updateCompanyInfoAction(input: {
-  companyName?: string;
-  tagline?: string;
-  history?: string;
-  vision?: string;
-  mission?: string;
-  address?: string;
-  phone?: string;
-  email?: string;
-  operatingHours?: string;
-  googleMapsEmbed?: string;
-}) {
+export async function updateCompanyInfoAction(input: Partial<CompanyInfoData>) {
   try {
-    const updated = await db.companyInfo.upsert({
-      where: { id: 1 },
-      create: {
-        id: 1,
-        companyName: input.companyName || "Baruna Jaya Plastik",
-        tagline: input.tagline,
-        history: input.history || "",
-        vision: input.vision,
-        mission: input.mission,
-        address: input.address || "",
-        phone: input.phone || "",
-        email: input.email || "",
-        operatingHours: input.operatingHours || "08.00 - 17.00 WIB",
-        googleMapsEmbed: input.googleMapsEmbed,
-      },
-      update: {
-        ...input,
-      },
-    });
-    return { success: true, data: updated, message: "Info profil perusahaan berhasil diperbarui." };
+    // 1. Always persist to local storage first (fail-safe for local offline environments)
+    const savedLocal = await saveCompanyInfoLocal(input);
+
+    // 2. Also persist to Database if DB is reachable
+    try {
+      await db.companyInfo.upsert({
+        where: { id: 1 },
+        create: {
+          id: 1,
+          companyName: input.companyName || "Baruna Jaya Plastik",
+          tagline: input.tagline,
+          history: input.history || "",
+          vision: input.vision,
+          mission: input.mission,
+          address: input.address || "",
+          phone: input.phone || "",
+          email: input.email || "",
+          operatingHours: input.operatingHours || "08.00 - 17.00 WIB",
+          googleMapsEmbed: input.googleMapsEmbed,
+
+          heroBgImage: input.heroBgImage,
+          heroHeadlineLine1: input.heroHeadlineLine1,
+          heroHeadlineLine2: input.heroHeadlineLine2,
+          heroStat1Value: input.heroStat1Value,
+          heroStat1Label: input.heroStat1Label,
+          heroStat2Value: input.heroStat2Value,
+          heroStat2Label: input.heroStat2Label,
+          heroSpecDesc: input.heroSpecDesc,
+
+          aboutEyebrow: input.aboutEyebrow,
+          aboutStatement: input.aboutStatement,
+
+          standardsEyebrow: input.standardsEyebrow,
+          standardsTitle: input.standardsTitle,
+          standardsEditorial: input.standardsEditorial,
+          standardsCards: input.standardsCards,
+        },
+        update: {
+          ...input,
+        },
+      });
+    } catch (dbErr) {
+      console.warn("DB update failed (using local JSON persistence):", dbErr);
+    }
+
+    revalidatePath("/");
+    revalidatePath("/admin/company");
+    return { success: true, data: savedLocal, message: "Konten website & profil perusahaan berhasil diperbarui." };
   } catch (error) {
     console.error("Error updating company info:", error);
     return { success: false, message: "Gagal memperbarui profil perusahaan." };
