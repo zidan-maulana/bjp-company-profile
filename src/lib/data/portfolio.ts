@@ -175,7 +175,7 @@ export async function getActivePortfolio(categoryFilter?: string): Promise<Portf
       });
 
       if (portfolio && portfolio.length > 0) {
-        return portfolio.map((item) => ({
+        return portfolio.map((item: any) => ({
           id: String(item.id),
           slug: item.slug || "",
           title: item.title,
@@ -183,7 +183,7 @@ export async function getActivePortfolio(categoryFilter?: string): Promise<Portf
           material: item.material,
           category: item.category,
           clientName: item.clientName || null,
-          images: (item.images || []).map((img) => ({
+          images: (item.images || []).map((img: any) => ({
             id: String(img.id),
             imageUrl: img.imageUrl,
             caption: img.caption || null,
