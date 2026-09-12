@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParallax } from "@/hooks/useParallax";
 import { useInView } from "@/hooks/useInView";
@@ -48,8 +48,14 @@ export default function ServicesSection({ initialServices }: ServicesSectionProp
           maxCapacity: (item as any).maxCapacity || null,
         }));
 
-  // Default to first card open when website is opened, toggled strictly by click
+  // Default to first card open on desktop, but closed initially on mobile
   const [activeId, setActiveId] = useState<string | null>(displayItems[0]?.id || "01");
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      setActiveId(null);
+    }
+  }, []);
 
   const handleToggle = (id: string) => {
     setActiveId((prev) => (prev === id ? null : id));
@@ -145,8 +151,8 @@ export default function ServicesSection({ initialServices }: ServicesSectionProp
                   showTopDivider ? "border-t border-zinc-200" : ""
                 } ${
                   isActive
-                    ? "bg-zinc-950 text-white py-10 sm:py-14"
-                    : "bg-transparent py-7 sm:py-8"
+                    ? "bg-zinc-950 text-white py-8 sm:py-14"
+                    : "bg-transparent py-5 sm:py-8"
                 }`}
               >
                 {/* Inner Content Grid (Responsive for Mobile & Desktop) */}
@@ -205,7 +211,11 @@ export default function ServicesSection({ initialServices }: ServicesSectionProp
                     </div>
 
                     {/* Column 3: Description & Smooth Expandable Technical Scope */}
-                    <div className="lg:col-span-6 flex flex-col justify-center">
+                    <div
+                      className={`lg:col-span-6 flex-col justify-center transition-all duration-300 ease-out ${
+                        isActive ? "flex mt-3 lg:mt-0" : "hidden lg:flex"
+                      }`}
+                    >
                       <p
                         className={`text-xs sm:text-[13px] leading-relaxed transition-colors duration-200 ${
                           isActive ? "text-zinc-300" : "text-zinc-600"
