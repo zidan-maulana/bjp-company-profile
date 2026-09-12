@@ -542,9 +542,18 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
                     >
                       {img.imageUrl.startsWith("data:") ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={img.imageUrl} alt="" className="w-full h-full object-cover" />
+                        <img
+                          src={img.imageUrl}
+                          alt={`${selectedItem.title} - foto ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
                       ) : (
-                        <Image src={img.imageUrl} alt="" fill className="object-cover" />
+                        <Image
+                          src={img.imageUrl}
+                          alt={`${selectedItem.title} - foto ${idx + 1}`}
+                          fill
+                          className="object-cover"
+                        />
                       )}
                     </button>
                   );

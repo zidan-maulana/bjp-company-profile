@@ -12,10 +12,84 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://bjp-company-profile.vercel.app";
+
 export const metadata: Metadata = {
-  title: "Baruna Jaya Plastik | Spesialis Mold & Cetakan Plastik Presisi",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Baruna Jaya Plastik | Pabrik & Bengkel Cetakan Plastik Presisi (Mold Maker)",
+    template: "%s | Baruna Jaya Plastik",
+  },
   description:
-    "Spesialis rancang bangun & servis cetakan plastic injection dan blowing presisi tinggi berbasis baja perkakas berkualitas sejak 2001 di Kalideres, Jakarta Barat.",
+    "Pabrik dan bengkel spesialis perancangan, pembuatan, dan servis cetakan plastik presisi (Plastic Injection & Blowing Mold Maker) berbasis baja perkakas berkualitas sejak 2001 di Kalideres, Jakarta Barat. Melayani cetakan industri otomotif, elektronik, medis, dan kemasan.",
+  keywords: [
+    "Baruna Jaya Plastik",
+    "BJP Mold",
+    "bengkel mold jakarta",
+    "jasa pembuatan mold plastik",
+    "plastic injection mold maker",
+    "blowing mold maker indonesia",
+    "pabrik cetakan plastik",
+    "cetakan injeksi plastik presisi",
+    "servis cetakan plastik jakarta barat",
+    "bengkel bubut cnc kalideres",
+    "wire cut sinker edm mold",
+    "cetakan botol plastik",
+    "precision tooling workshop indonesia",
+    "stavax din 1.2316 mold steel",
+  ],
+  authors: [{ name: "PT Baruna Jaya Plastik", url: siteUrl }],
+  creator: "PT Baruna Jaya Plastik",
+  publisher: "PT Baruna Jaya Plastik",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  alternates: {
+    canonical: "/",
+    languages: {
+      "id-ID": "/",
+      "en-US": "/?lang=en",
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "id_ID",
+    alternateLocale: ["en_US"],
+    url: siteUrl,
+    siteName: "PT Baruna Jaya Plastik",
+    title: "Baruna Jaya Plastik | Pabrik & Bengkel Cetakan Plastik Presisi (Mold Maker)",
+    description:
+      "Spesialis rancang bangun & servis cetakan plastic injection dan blowing presisi tinggi berbasis baja perkakas berkualitas sejak 2001 di Kalideres, Jakarta Barat.",
+    images: [
+      {
+        url: "/mold-tool-close.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Pabrik Pembuatan Mold & Cetakan Injeksi Plastik Presisi - Baruna Jaya Plastik",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Baruna Jaya Plastik | Pabrik & Bengkel Cetakan Plastik Presisi",
+    description:
+      "Spesialis rancang bangun & servis cetakan plastic injection & blowing presisi tinggi sejak 2001 di Kalideres, Jakarta Barat.",
+    images: ["/mold-tool-close.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  category: "Manufacturing & Industrial Tooling",
 };
 
 import { LanguageProvider } from "@/context/LanguageContext";
