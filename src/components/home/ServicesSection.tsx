@@ -167,7 +167,7 @@ export default function ServicesSection({ initialServices }: ServicesSectionProp
                           {item.number || item.id}
                         </span>
 
-                        {/* Title, Subtitle & Capacity Badge */}
+                        {/* Title & English Subtitle */}
                         <div>
                           <h3
                             className={`text-lg sm:text-2xl font-medium tracking-tight transition-colors duration-200 ${
@@ -178,26 +178,9 @@ export default function ServicesSection({ initialServices }: ServicesSectionProp
                           >
                             {item.title}
                           </h3>
-                          <div className="flex flex-wrap items-center gap-2 mt-0.5 sm:mt-1">
-                            <p className="text-[11px] sm:text-xs font-mono tracking-wide uppercase text-zinc-400">
-                              {item.subtitle}
-                            </p>
-                            {item.maxCapacity && (
-                              <span
-                                className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[9.5px] sm:text-[10.5px] font-mono tracking-wider uppercase border transition-colors ${
-                                  isActive
-                                    ? "bg-orange-950/60 border-orange-500/40 text-orange-400"
-                                    : "bg-zinc-100 border-zinc-200 text-zinc-600 group-hover:border-orange-300 group-hover:text-orange-600"
-                                }`}
-                              >
-                                <span className="w-1 h-1 rounded-full bg-orange-500 shrink-0" />
-                                <span>
-                                  {locale === "id" ? "Kapasitas:" : "Capacity:"}{" "}
-                                  <strong className="font-semibold">{item.maxCapacity}</strong>
-                                </span>
-                              </span>
-                            )}
-                          </div>
+                          <p className="text-[11px] sm:text-xs font-mono tracking-wide mt-0.5 sm:mt-1 uppercase text-zinc-400">
+                            {item.subtitle}
+                          </p>
                         </div>
                       </div>
 
@@ -240,23 +223,17 @@ export default function ServicesSection({ initialServices }: ServicesSectionProp
                         }`}
                       >
                         <div className="overflow-hidden">
-                          {/* Dedicated Max Capacity Highlight Box */}
-                          {item.maxCapacity && (
-                            <div className="mb-3.5 p-2.5 sm:p-3 bg-zinc-900 border border-zinc-800 flex flex-wrap items-center justify-between gap-2">
-                              <div className="flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse shrink-0" />
-                                <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-zinc-400">
-                                  {locale === "id" ? "Kapasitas Maksimal Mesin / Mold:" : "Max Machine / Mold Capacity:"}
-                                </span>
-                              </div>
-                              <span className="text-[11px] sm:text-xs font-mono font-bold text-orange-400 px-2.5 py-0.5 bg-orange-950/40 border border-orange-500/30">
-                                {item.maxCapacity}
-                              </span>
-                            </div>
-                          )}
-
-                          {/* Capabilities / Materials Tags */}
+                          {/* Capabilities & Capacity Tags (Small & Consistent) */}
                           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                            {item.maxCapacity && (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-zinc-900 border border-orange-500/40 text-[10px] sm:text-[11px] font-mono text-orange-300">
+                                <span className="w-1 h-1 bg-orange-500 shrink-0" />
+                                <span>
+                                  {locale === "id" ? "Kapasitas Maksimal: " : "Max Capacity: "}
+                                  <strong className="font-semibold text-white">{item.maxCapacity}</strong>
+                                </span>
+                              </span>
+                            )}
                             {item.capabilities.map((cap, idx) => (
                               <span
                                 key={idx}
