@@ -561,35 +561,25 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
               </div>
             )}
 
-            {/* Technical Specifications Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
-              <div className="p-3 bg-[#1A1A1A] border border-[#2B2B2B]">
+            {/* Technical Specifications Grid (Hanya yang relevan dari dashboard admin) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
+              <div className="p-3.5 bg-[#1A1A1A] border border-[#2B2B2B]">
                 <span className="text-[10px] text-zinc-400 uppercase tracking-wider block mb-1">
-                  {locale === "id" ? "Bahan Baja Mold" : "Tool Steel Material"}
+                  {locale === "id" ? "Kategori Sektor" : "Industry Category"}
                 </span>
-                <span className="text-white font-semibold flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0" />
-                  {selectedItem.material || "Baja Perkakas Khusus"}
-                </span>
-              </div>
-
-              <div className="p-3 bg-[#1A1A1A] border border-[#2B2B2B]">
-                <span className="text-[10px] text-zinc-400 uppercase tracking-wider block mb-1">
-                  {locale === "id" ? "Sektor Industri" : "Industry Category"}
-                </span>
-                <span className="text-white font-semibold flex items-center gap-1.5">
+                <span className="text-white font-semibold flex items-center gap-1.5 text-sm">
                   <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0" />
                   {selectedItem.category}
                 </span>
               </div>
 
-              <div className="p-3 bg-[#1A1A1A] border border-[#2B2B2B]">
+              <div className="p-3.5 bg-[#1A1A1A] border border-[#2B2B2B]">
                 <span className="text-[10px] text-zinc-400 uppercase tracking-wider block mb-1">
-                  {locale === "id" ? "Mitra / Klien" : "Client / Partner"}
+                  {locale === "id" ? "Material Baja" : "Tool Steel Material"}
                 </span>
-                <span className="text-white font-semibold flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                  {selectedItem.clientName || (locale === "id" ? "Mitra Industri (NDA)" : "Industrial Partner")}
+                <span className="text-white font-semibold flex items-center gap-1.5 text-sm">
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0" />
+                  {selectedItem.material || (locale === "id" ? "Baja Perkakas Khusus" : "Special Tool Steel")}
                 </span>
               </div>
             </div>
@@ -597,9 +587,9 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
             {/* Technical Description Box */}
             <div className="p-4 bg-[#1A1A1A] border border-[#2B2B2B] text-xs font-mono space-y-1.5">
               <span className="text-[10px] text-orange-400 font-bold uppercase tracking-wider block">
-                {locale === "id" ? "Deskripsi & Karakteristik Cetakan:" : "Mold Technical Description:"}
+                {locale === "id" ? "Deskripsi Teknis Cetakan:" : "Mold Technical Description:"}
               </span>
-              <p className="text-zinc-300 leading-relaxed whitespace-pre-line">
+              <p className="text-zinc-300 leading-relaxed whitespace-pre-line text-[13px]">
                 {selectedItem.description}
               </p>
             </div>
