@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { Info, X } from "lucide-react";
 import { useParallax } from "@/hooks/useParallax";
@@ -173,9 +174,44 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartX, setDragStartX] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
+  const hasMovedRef = useRef(false);
+
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (selectedItem) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [selectedItem]);
+
+  // Handle escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setSelectedItem(null);
+      }
+    };
+    if (selectedItem) {
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [selectedItem]);
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.button !== 0) return;
+    // Do not hijack pointer if clicked an interactive button inside the cards
+    if ((e.target as HTMLElement).closest("button")) {
+      return;
+    }
+    hasMovedRef.current = false;
     setIsDragging(true);
     setDragStartX(e.clientX);
     setDragOffset(0);
@@ -189,6 +225,9 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isDragging) return;
     const delta = e.clientX - dragStartX;
+    if (Math.abs(delta) > 6) {
+      hasMovedRef.current = true;
+    }
     if ((currentIndex === 0 && delta > 0) || (currentIndex === maxIndex && delta < 0)) {
       setDragOffset(delta * 0.25);
     } else {
@@ -311,6 +350,7 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
               <div
                 key={item.id}
                 onClick={() => {
+                  if (hasMovedRef.current) return;
                   setSelectedItem(item);
                   setActiveModalImage(item.image);
                 }}
@@ -349,16 +389,23 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
                   {/* Information Button on Top-Right of Card */}
                   <button
                     type="button"
+                    onPointerDown={(e) => {
+                      e.stopPropagation();
+                    }}
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                    }}
                     onClick={(e) => {
                       e.stopPropagation();
+                      e.preventDefault();
                       setSelectedItem(item);
                       setActiveModalImage(item.image);
                     }}
-                    className="absolute top-2.5 right-2.5 z-20 inline-flex items-center gap-1.5 px-2 py-1 bg-black/80 hover:bg-orange-600 text-white text-[10px] font-mono uppercase tracking-wider backdrop-blur-sm border border-white/20 hover:border-orange-500 transition-all duration-200 cursor-pointer shadow-lg active:scale-95"
-                    title={locale === "id" ? "Lihat Detail Portofolio" : "View Portfolio Details"}
-                    aria-label="Lihat Informasi Portofolio"
+                    className="absolute top-2.5 right-2.5 z-20 inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-orange-600 hover:bg-orange-500 text-white text-[10px] font-mono font-bold uppercase tracking-wider border border-orange-400/60 transition-all duration-200 cursor-pointer shadow-lg active:scale-95 select-none"
+                    title={locale === "id" ? "Lihat Detail Produk" : "View Product Details"}
+                    aria-label="Lihat Informasi Produk"
                   >
-                    <Info className="w-3.5 h-3.5 text-orange-400" />
+                    <Info className="w-3.5 h-3.5 text-white" />
                     <span>{locale === "id" ? "Detail" : "Info"}</span>
                   </button>
                 </div>
@@ -376,12 +423,19 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
 
                   <button
                     type="button"
+                    onPointerDown={(e) => {
+                      e.stopPropagation();
+                    }}
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                    }}
                     onClick={(e) => {
                       e.stopPropagation();
+                      e.preventDefault();
                       setSelectedItem(item);
                       setActiveModalImage(item.image);
                     }}
-                    className="shrink-0 p-1.5 text-zinc-400 hover:text-orange-600 hover:bg-orange-50 transition-colors cursor-pointer"
+                    className="shrink-0 p-1.5 text-zinc-500 hover:text-orange-600 hover:bg-orange-50 transition-colors cursor-pointer"
                     title={locale === "id" ? "Lihat Informasi Detail" : "View Details"}
                     aria-label="Informasi Portofolio"
                   >
@@ -399,33 +453,16 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
           {/* Left: Page Counter & Precision Indicator Dash */}
           <div className="flex items-center gap-2.5 sm:gap-4">
             <span className="text-[11px] sm:text-xs font-mono font-medium text-zinc-500 tracking-wider">
-              {t.portfolio.pageLabel}
+              [ {String(currentPage).padStart(2, "0")} / {String(totalPages).padStart(2, "0")} ]
             </span>
-            <span className="text-xs sm:text-sm font-mono font-bold text-zinc-950">
-              {String(currentPage).padStart(2, "0")} / {String(totalPages).padStart(2, "0")}
+            <span className="hidden sm:inline-block w-8 sm:w-12 h-px bg-zinc-300" />
+            <span className="text-[10px] sm:text-[11px] font-mono text-zinc-400 uppercase tracking-widest hidden md:inline">
+              {locale === "id" ? "KLIK KARTU / BUTTON DETAIL UNTUK SPESIFIKASI LENGKAP" : "CLICK CARD / DETAIL BUTTON FOR FULL SPECS"}
             </span>
-
-            {/* Dash Indicators (Hidden on small mobile screens to keep row compact) */}
-            <div className="hidden sm:flex items-center gap-2 ml-4">
-              {Array.from({ length: totalPages }).map((_, pIdx) => {
-                const isActive = currentPage === pIdx + 1;
-                return (
-                  <button
-                    key={pIdx}
-                    type="button"
-                    onClick={() => setCurrentIndex(pIdx * cardsPerPage)}
-                    className={`h-1 transition-all duration-800 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-none cursor-pointer ${
-                      isActive ? "w-10 bg-orange-600" : "w-5 bg-zinc-300 hover:bg-zinc-400"
-                    }`}
-                    aria-label={`Pindah ke halaman ${pIdx + 1}`}
-                  />
-                );
-              })}
-            </div>
           </div>
 
-          {/* Right: Square Arrow Navigation Buttons */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          {/* Right: Technical Carousel Arrow Navigation Controls */}
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             <button
               type="button"
               onClick={handlePrev}
@@ -439,7 +476,6 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
             >
               ←
             </button>
-
             <button
               type="button"
               onClick={handleNext}
@@ -461,174 +497,177 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
 
       </div>
 
-      {/* Portfolio Detail Pop-up Modal */}
-      {selectedItem && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto"
-          onClick={() => setSelectedItem(null)}
-        >
-          <div
-            className="relative bg-[#141414] border border-[#2B2B2B] w-full max-w-2xl my-auto p-5 sm:p-7 space-y-5 shadow-2xl animate-in zoom-in-95 duration-200 text-zinc-100"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* 4 Precision Corner Registration Marks */}
-            <span className="absolute top-2 left-2 w-1.5 h-1.5 bg-orange-600 z-20" />
-            <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-orange-600 z-20" />
-            <span className="absolute bottom-2 left-2 w-1.5 h-1.5 bg-orange-600 z-20" />
-            <span className="absolute bottom-2 right-2 w-1.5 h-1.5 bg-orange-600 z-20" />
-
-            {/* Modal Header */}
-            <div className="flex items-start justify-between gap-4 pb-4 border-b border-[#262626]">
-              <div>
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="px-2 py-0.5 bg-orange-600/20 border border-orange-500/40 text-orange-400 text-[10px] font-mono font-bold tracking-wider uppercase">
-                    #{selectedItem.id} {selectedItem.category}
-                  </span>
-                  <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">
-                    {locale === "id" ? "SPESIFIKASI MOLD PRESISI" : "PRECISION MOLD SPECS"}
-                  </span>
-                </div>
-                <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
-                  {selectedItem.title}
-                </h3>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setSelectedItem(null)}
-                className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors shrink-0 cursor-pointer"
-                title="Tutup"
-                aria-label="Tutup Modal"
+      {/* Portfolio Detail Pop-up Modal (Mounted to document.body via React Portal) */}
+      {isMounted && selectedItem && typeof document !== "undefined"
+        ? createPortal(
+            <div
+              role="dialog"
+              aria-modal="true"
+              className="fixed inset-0 z-[999999] flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto"
+              onClick={() => setSelectedItem(null)}
+            >
+              <div
+                className="relative bg-[#141414] border border-[#2B2B2B] w-full max-w-2xl my-auto p-5 sm:p-7 space-y-5 shadow-2xl animate-in zoom-in-95 duration-200 text-zinc-100"
+                onClick={(e) => e.stopPropagation()}
               >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+                {/* 4 Precision Corner Registration Marks */}
+                <span className="absolute top-2 left-2 w-1.5 h-1.5 bg-orange-600 z-20" />
+                <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-orange-600 z-20" />
+                <span className="absolute bottom-2 left-2 w-1.5 h-1.5 bg-orange-600 z-20" />
+                <span className="absolute bottom-2 right-2 w-1.5 h-1.5 bg-orange-600 z-20" />
 
-            {/* Main Image Preview */}
-            <div className="relative aspect-[16/10] w-full overflow-hidden bg-zinc-900 border border-zinc-800">
-              {(activeModalImage || selectedItem.image).startsWith("data:") ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={activeModalImage || selectedItem.image}
-                  alt={selectedItem.title}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <Image
-                  src={activeModalImage || selectedItem.image}
-                  alt={selectedItem.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 672px"
-                  className="object-cover"
-                />
-              )}
-            </div>
+                {/* Modal Header */}
+                <div className="flex items-start justify-between gap-4 pb-4 border-b border-[#262626]">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="px-2 py-0.5 bg-orange-600/20 border border-orange-500/40 text-orange-400 text-[10px] font-mono font-bold tracking-wider uppercase">
+                        #{selectedItem.id} {selectedItem.category}
+                      </span>
+                      <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">
+                        {locale === "id" ? "SPESIFIKASI MOLD PRESISI" : "PRECISION MOLD SPECS"}
+                      </span>
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
+                      {selectedItem.title}
+                    </h3>
+                  </div>
 
-            {/* Multi-Photo Thumbnails (if multiple photos exist) */}
-            {selectedItem.images && selectedItem.images.length > 1 && (
-              <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                {selectedItem.images.map((img, idx) => {
-                  const isSelected = (activeModalImage || selectedItem.image) === img.imageUrl;
-                  return (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedItem(null)}
+                    className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors shrink-0 cursor-pointer"
+                    title="Tutup"
+                    aria-label="Tutup Modal"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Main Image Preview */}
+                <div className="relative aspect-[16/10] w-full overflow-hidden bg-zinc-900 border border-zinc-800">
+                  {(activeModalImage || selectedItem.image).startsWith("data:") ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={activeModalImage || selectedItem.image}
+                      alt={selectedItem.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Image
+                      src={activeModalImage || selectedItem.image}
+                      alt={selectedItem.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 672px"
+                      className="object-cover"
+                    />
+                  )}
+                </div>
+
+                {/* Multi-Photo Thumbnails (if multiple photos exist) */}
+                {selectedItem.images && selectedItem.images.length > 1 && (
+                  <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                    {selectedItem.images.map((img, idx) => {
+                      const isSelected = (activeModalImage || selectedItem.image) === img.imageUrl;
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setActiveModalImage(img.imageUrl)}
+                          className={`relative w-16 h-12 flex-shrink-0 border overflow-hidden transition-all cursor-pointer ${
+                            isSelected ? "border-orange-500 scale-105" : "border-zinc-800 opacity-70 hover:opacity-100"
+                          }`}
+                        >
+                          {img.imageUrl.startsWith("data:") ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={img.imageUrl}
+                              alt={`${selectedItem.title} - foto ${idx + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <Image
+                              src={img.imageUrl}
+                              alt={`${selectedItem.title} - foto ${idx + 1}`}
+                              fill
+                              className="object-cover"
+                            />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Technical Specifications Grid (Hanya yang relevan dari dashboard admin) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
+                  <div className="p-3.5 bg-[#1A1A1A] border border-[#2B2B2B]">
+                    <span className="text-[10px] text-zinc-400 uppercase tracking-wider block mb-1">
+                      {locale === "id" ? "Kategori Sektor" : "Industry Category"}
+                    </span>
+                    <span className="text-white font-semibold flex items-center gap-1.5 text-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0" />
+                      {selectedItem.category}
+                    </span>
+                  </div>
+
+                  <div className="p-3.5 bg-[#1A1A1A] border border-[#2B2B2B]">
+                    <span className="text-[10px] text-zinc-400 uppercase tracking-wider block mb-1">
+                      {locale === "id" ? "Material Baja" : "Tool Steel Material"}
+                    </span>
+                    <span className="text-white font-semibold flex items-center gap-1.5 text-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0" />
+                      {selectedItem.material || (locale === "id" ? "Baja Perkakas Khusus" : "Special Tool Steel")}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Technical Description Box */}
+                <div className="p-4 bg-[#1A1A1A] border border-[#2B2B2B] text-xs font-mono space-y-1.5">
+                  <span className="text-[10px] text-orange-400 font-bold uppercase tracking-wider block">
+                    {locale === "id" ? "Deskripsi Teknis Cetakan:" : "Mold Technical Description:"}
+                  </span>
+                  <p className="text-zinc-300 leading-relaxed whitespace-pre-line text-[13px]">
+                    {selectedItem.description}
+                  </p>
+                </div>
+
+                {/* Modal Actions */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-[#262626]">
+                  <span className="text-[11px] font-mono text-zinc-400 hidden sm:inline">
+                    {locale === "id" ? "Garansi siap uji coba cetak T0/T1" : "Production-ready trial guaranteed"}
+                  </span>
+
+                  <div className="flex items-center gap-3 w-full sm:w-auto">
                     <button
-                      key={idx}
                       type="button"
-                      onClick={() => setActiveModalImage(img.imageUrl)}
-                      className={`relative w-16 h-12 flex-shrink-0 border overflow-hidden transition-all cursor-pointer ${
-                        isSelected ? "border-orange-500 scale-105" : "border-zinc-800 opacity-70 hover:opacity-100"
-                      }`}
+                      onClick={() => setSelectedItem(null)}
+                      className="flex-1 sm:flex-none px-4 py-2.5 bg-[#1A1A1A] border border-[#333333] hover:border-zinc-500 text-zinc-300 font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer"
                     >
-                      {img.imageUrl.startsWith("data:") ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={img.imageUrl}
-                          alt={`${selectedItem.title} - foto ${idx + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <Image
-                          src={img.imageUrl}
-                          alt={`${selectedItem.title} - foto ${idx + 1}`}
-                          fill
-                          className="object-cover"
-                        />
-                      )}
+                      {locale === "id" ? "Tutup" : "Close"}
                     </button>
-                  );
-                })}
+
+                    <a
+                      href="#kontak"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setSelectedItem(null);
+                        const elem = document.getElementById("kontak");
+                        if (elem) {
+                          elem.scrollIntoView({ behavior: "smooth" });
+                          window.history.pushState(null, "", "#kontak");
+                        }
+                      }}
+                      className="flex-1 sm:flex-none px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white font-mono text-xs font-semibold uppercase tracking-wider transition-colors text-center cursor-pointer shadow-lg shadow-orange-950/40"
+                    >
+                      {locale === "id" ? "Konsultasi Cetakan Serupa" : "Consult Similar Mold"}
+                    </a>
+                  </div>
+                </div>
               </div>
-            )}
-
-            {/* Technical Specifications Grid (Hanya yang relevan dari dashboard admin) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
-              <div className="p-3.5 bg-[#1A1A1A] border border-[#2B2B2B]">
-                <span className="text-[10px] text-zinc-400 uppercase tracking-wider block mb-1">
-                  {locale === "id" ? "Kategori Sektor" : "Industry Category"}
-                </span>
-                <span className="text-white font-semibold flex items-center gap-1.5 text-sm">
-                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0" />
-                  {selectedItem.category}
-                </span>
-              </div>
-
-              <div className="p-3.5 bg-[#1A1A1A] border border-[#2B2B2B]">
-                <span className="text-[10px] text-zinc-400 uppercase tracking-wider block mb-1">
-                  {locale === "id" ? "Material Baja" : "Tool Steel Material"}
-                </span>
-                <span className="text-white font-semibold flex items-center gap-1.5 text-sm">
-                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0" />
-                  {selectedItem.material || (locale === "id" ? "Baja Perkakas Khusus" : "Special Tool Steel")}
-                </span>
-              </div>
-            </div>
-
-            {/* Technical Description Box */}
-            <div className="p-4 bg-[#1A1A1A] border border-[#2B2B2B] text-xs font-mono space-y-1.5">
-              <span className="text-[10px] text-orange-400 font-bold uppercase tracking-wider block">
-                {locale === "id" ? "Deskripsi Teknis Cetakan:" : "Mold Technical Description:"}
-              </span>
-              <p className="text-zinc-300 leading-relaxed whitespace-pre-line text-[13px]">
-                {selectedItem.description}
-              </p>
-            </div>
-
-            {/* Modal Actions */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-[#262626]">
-              <span className="text-[11px] font-mono text-zinc-400 hidden sm:inline">
-                {locale === "id" ? "Garansi siap uji coba cetak T0/T1" : "Production-ready trial guaranteed"}
-              </span>
-
-              <div className="flex items-center gap-3 w-full sm:w-auto">
-                <button
-                  type="button"
-                  onClick={() => setSelectedItem(null)}
-                  className="flex-1 sm:flex-none px-4 py-2.5 bg-[#1A1A1A] border border-[#333333] hover:border-zinc-500 text-zinc-300 font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer"
-                >
-                  {locale === "id" ? "Tutup" : "Close"}
-                </button>
-
-                <a
-                  href="#kontak"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setSelectedItem(null);
-                    const elem = document.getElementById("kontak");
-                    if (elem) {
-                      elem.scrollIntoView({ behavior: "smooth" });
-                      window.history.pushState(null, "", "#kontak");
-                    }
-                  }}
-                  className="flex-1 sm:flex-none px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white font-mono text-xs font-semibold uppercase tracking-wider transition-colors text-center cursor-pointer shadow-lg shadow-orange-950/40"
-                >
-                  {locale === "id" ? "Konsultasi Cetakan Serupa" : "Consult Similar Mold"}
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+            </div>,
+            document.body
+          )
+        : null}
     </section>
   );
 }
