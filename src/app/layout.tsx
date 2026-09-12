@@ -60,6 +60,16 @@ export const metadata: Metadata = {
       "en-US": "/?lang=en",
     },
   },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: [
+      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: "/icon.svg",
+  },
   openGraph: {
     type: "website",
     locale: "id_ID",
