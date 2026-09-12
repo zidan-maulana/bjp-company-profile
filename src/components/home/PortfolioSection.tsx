@@ -495,19 +495,9 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
 
                 {/* Modal Header */}
                 <div className="flex items-start justify-between gap-4 pb-4 border-b border-[#262626]">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <span className="px-2 py-0.5 bg-orange-600/20 border border-orange-500/40 text-orange-400 text-[10px] font-mono font-bold tracking-wider uppercase">
-                        #{selectedItem.id} {selectedItem.category}
-                      </span>
-                      <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">
-                        {locale === "id" ? "SPESIFIKASI MOLD PRESISI" : "PRECISION MOLD SPECS"}
-                      </span>
-                    </div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
-                      {selectedItem.title}
-                    </h3>
-                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
+                    {selectedItem.title}
+                  </h3>
 
                   <button
                     type="button"
@@ -609,11 +599,7 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
                 </div>
 
                 {/* Modal Actions */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-[#262626]">
-                  <span className="text-[11px] font-mono text-zinc-400 hidden sm:inline">
-                    {locale === "id" ? "Garansi siap uji coba cetak T0/T1" : "Production-ready trial guaranteed"}
-                  </span>
-
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#262626]">
                   <div className="flex items-center gap-3 w-full sm:w-auto">
                     <button
                       type="button"
