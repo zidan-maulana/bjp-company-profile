@@ -9,6 +9,7 @@ import Footer from "@/components/layout/Footer";
 import { getActivePortfolio } from "@/lib/data/portfolio";
 import { getCompanyInfo } from "@/lib/data/company";
 import { getActiveServices, DEFAULT_SERVICES } from "@/lib/data/services";
+import { getSiteUrl } from "@/lib/siteUrl";
 
 export const dynamic = "force-dynamic";
 
@@ -19,8 +20,7 @@ export default async function Home() {
     getActiveServices(),
   ]);
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL || "https://bjp-company-profile.vercel.app";
+  const baseUrl = getSiteUrl();
 
   const rawPhone = companyInfo?.phone || "081283840614";
   const formattedPhone = rawPhone.startsWith("+")
@@ -78,10 +78,15 @@ export default async function Home() {
             closes: "17:00",
           },
         ],
-        areaServed: {
-          "@type": "Country",
-          name: "Indonesia",
-        },
+        areaServed: [
+          { "@type": "AdministrativeArea", name: "DKI Jakarta" },
+          { "@type": "AdministrativeArea", name: "Jakarta Barat" },
+          { "@type": "AdministrativeArea", name: "Tangerang" },
+          { "@type": "AdministrativeArea", name: "Banten" },
+          { "@type": "AdministrativeArea", name: "Bekasi" },
+          { "@type": "AdministrativeArea", name: "Karawang" },
+          { "@type": "Country", name: "Indonesia" },
+        ],
         knowsAbout: [
           "Plastic Injection Mold",
           "Blowing Mold",
@@ -118,6 +123,74 @@ export default async function Home() {
           "@id": `${baseUrl}/#organization`,
         },
         inLanguage: ["id-ID", "en-US"],
+      },
+      {
+        "@type": "FAQPage",
+        "@id": `${baseUrl}/#faq`,
+        mainEntity: [
+          {
+            "@type": "Question",
+            name: "Berapa lama estimasi waktu pembuatan satu unit cetakan injeksi plastik?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "Waktu fabrikasi umumnya berkisar antara 25 hingga 45 hari kerja tergantung pada kompleksitas desain part, jumlah cavity, dan jenis baja mold yang dipilih. Waktu ini sudah termasuk uji coba cetak pertama (T0/T1 trial) hingga sampel produk disetujui klien.",
+            },
+          },
+          {
+            "@type": "Question",
+            name: "Jenis baja perkakas apa yang digunakan oleh Baruna Jaya Plastik?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "Kami menggunakan baja perkakas standar industri berkualitas tinggi seperti Stavax (stainless anti karat), DIN 1.2316, NAK80, P20, dan SKD61 yang disesuaikan dengan volume produksi dan karakteristik kimia resin plastik klien.",
+            },
+          },
+          {
+            "@type": "Question",
+            name: "Apakah Baruna Jaya Plastik melayani servis dan modifikasi mold lama?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "Ya, kami melayani servis menyeluruh termasuk rekondisi cavity/core yang aus, perbaikan sistem pendingin (cooling channel) bocor, penyesuaian dimensi part, penggantian part standard (ejector pin, bushing), dan re-polishing mold.",
+            },
+          },
+          {
+            "@type": "Question",
+            name: "Di mana lokasi bengkel dan workshop Baruna Jaya Plastik?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "Workshop kami berlokasi di Jl. Kampung Belakang RT 001/05 No. 37, Kamal, Kalideres, Jakarta Barat 11810. Kami melayani industri manufaktur dari wilayah Jabodetabek, Karawang, hingga seluruh Indonesia.",
+            },
+          },
+        ],
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${baseUrl}/#breadcrumb`,
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Beranda",
+            item: baseUrl,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Layanan Cetakan Plastik",
+            item: `${baseUrl}/#layanan`,
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: "Portofolio Mold",
+            item: `${baseUrl}/#portofolio`,
+          },
+          {
+            "@type": "ListItem",
+            position: 4,
+            name: "Hubungi Kami",
+            item: `${baseUrl}/#kontak`,
+          },
+        ],
       },
     ],
   };

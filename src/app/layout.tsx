@@ -12,7 +12,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://bjp-company-profile.vercel.app";
+import { getSiteUrl } from "@/lib/siteUrl";
+
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -26,17 +28,22 @@ export const metadata: Metadata = {
     "Baruna Jaya Plastik",
     "BJP Mold",
     "bengkel mold jakarta",
+    "bengkel mold injection jakarta barat",
     "jasa pembuatan mold plastik",
-    "plastic injection mold maker",
-    "blowing mold maker indonesia",
     "pabrik cetakan plastik",
+    "bengkel cetakan plastik kalideres",
+    "jasa bikin cetakan plastik tangerang",
+    "plastic injection mold maker indonesia",
+    "blowing mold maker indonesia",
     "cetakan injeksi plastik presisi",
-    "servis cetakan plastik jakarta barat",
-    "bengkel bubut cnc kalideres",
+    "servis cetakan plastik jakarta",
+    "modifikasi mold plastik",
+    "bengkel bubut cnc mold maker",
     "wire cut sinker edm mold",
     "cetakan botol plastik",
+    "cetakan part otomotif plastik",
     "precision tooling workshop indonesia",
-    "stavax din 1.2316 mold steel",
+    "baja perkakas stavax din 1.2316",
   ],
   authors: [{ name: "PT Baruna Jaya Plastik", url: siteUrl }],
   creator: "PT Baruna Jaya Plastik",
@@ -88,6 +95,19 @@ export const metadata: Metadata = {
       "max-image-preview": "large",
       "max-snippet": -1,
     },
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+    yandex: process.env.NEXT_PUBLIC_YANDEX_VERIFICATION,
+    other: {
+      "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION || "",
+    },
+  },
+  other: {
+    "geo.region": "ID-JK",
+    "geo.placename": "Jakarta Barat, Kalideres",
+    "geo.position": "-6.109;106.7027",
+    ICBM: "-6.109, 106.7027",
   },
   category: "Manufacturing & Industrial Tooling",
 };
