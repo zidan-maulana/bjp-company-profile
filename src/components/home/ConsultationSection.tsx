@@ -317,7 +317,7 @@ export default function ConsultationSection({ companyInfo }: ConsultationSection
 
               {/* Panel Header */}
               <div className="mt-1 mb-6 sm:mb-7 text-center sm:text-left">
-                <h3 className="text-base sm:text-lg font-mono font-semibold uppercase tracking-[0.2em] text-white">
+                <h3 className="text-xs min-[360px]:text-[13px] sm:text-lg font-mono font-semibold uppercase tracking-[0.05em] min-[360px]:tracking-[0.08em] sm:tracking-[0.2em] text-white whitespace-nowrap">
                   {t.consultation.formTitle}
                 </h3>
                 <div className="w-full h-px bg-[#2E2E2E] mt-3" />
