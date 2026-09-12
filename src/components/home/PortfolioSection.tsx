@@ -354,7 +354,7 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
                   setSelectedItem(item);
                   setActiveModalImage(item.image);
                 }}
-                className="w-[var(--card-w)] flex-shrink-0 relative group bg-[#FAFAFA] border border-zinc-200 hover:border-zinc-400 p-3 sm:p-4 rounded-none transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md"
+                className="w-[var(--card-w)] flex-shrink-0 relative group bg-[#FAFAFA] border border-zinc-200 hover:border-zinc-400 p-3 sm:p-4 rounded-none transition-all duration-200 cursor-pointer"
               >
                 {/* 4 Corner Precision Registration Dots */}
                 <span className="absolute top-2 left-2 w-1 h-1 bg-orange-600 z-20" />
@@ -369,7 +369,7 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
                     <img
                       src={item.image}
                       alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-cover"
                     />
                   ) : (
                     <Image
@@ -377,7 +377,7 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
                       alt={item.title}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="object-cover"
                     />
                   )}
 
@@ -401,11 +401,11 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
                       setSelectedItem(item);
                       setActiveModalImage(item.image);
                     }}
-                    className="absolute top-2.5 right-2.5 z-20 inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-orange-600 hover:bg-orange-500 text-white text-[10px] font-mono font-bold uppercase tracking-wider border border-orange-400/60 transition-all duration-200 cursor-pointer shadow-lg active:scale-95 select-none"
+                    className="absolute top-2.5 right-2.5 z-20 inline-flex items-center gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 bg-black/75 hover:bg-orange-600 text-white text-[9.5px] sm:text-[10px] font-mono uppercase tracking-wider backdrop-blur-sm border border-white/20 hover:border-orange-500 transition-all duration-200 cursor-pointer active:scale-95 select-none"
                     title={locale === "id" ? "Lihat Detail Produk" : "View Product Details"}
                     aria-label="Lihat Informasi Produk"
                   >
-                    <Info className="w-3.5 h-3.5 text-white" />
+                    <Info className="w-3 h-3 text-orange-400" />
                     <span>{locale === "id" ? "Detail" : "Info"}</span>
                   </button>
                 </div>
@@ -435,7 +435,7 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
                       setSelectedItem(item);
                       setActiveModalImage(item.image);
                     }}
-                    className="shrink-0 p-1.5 text-zinc-500 hover:text-orange-600 hover:bg-orange-50 transition-colors cursor-pointer"
+                    className="shrink-0 p-1.5 text-zinc-400 hover:text-orange-600 transition-colors cursor-pointer"
                     title={locale === "id" ? "Lihat Informasi Detail" : "View Details"}
                     aria-label="Informasi Portofolio"
                   >
