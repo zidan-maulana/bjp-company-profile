@@ -43,5 +43,3 @@ next-env.d.ts
 
 /src/generated/prisma
 
-# local tech stack doc
-docs/TECH_STACK.md
