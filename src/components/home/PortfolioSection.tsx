@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import { Info, X } from "lucide-react";
 import { useParallax } from "@/hooks/useParallax";
 import { useInView } from "@/hooks/useInView";
 import { useLanguage } from "@/context/LanguageContext";
@@ -28,15 +29,31 @@ interface PortfolioSectionProps {
   initialItems?: PortfolioItemData[];
 }
 
-export default function PortfolioSection({ initialItems }: PortfolioSectionProps) {
-  const { t } = useLanguage();
+interface DetailItem {
+  id: string;
+  dbId?: string;
+  title: string;
+  category: string;
+  material: string;
+  clientName?: string | null;
+  spec: string;
+  image: string;
+  images: PortfolioImage[];
+  description: string;
+}
 
-  const portfolioItems =
+export default function PortfolioSection({ initialItems }: PortfolioSectionProps) {
+  const { locale, t } = useLanguage();
+
+  const portfolioItems: DetailItem[] =
     initialItems && initialItems.length > 0
       ? initialItems.map((item, idx) => ({
           id: String(idx + 1).padStart(2, "0"),
           dbId: item.id,
           title: item.title,
+          category: item.category,
+          material: item.material,
+          clientName: item.clientName || null,
           spec: `${item.category.toUpperCase()} • ${item.material.toUpperCase()}${
             item.clientName ? ` • ${item.clientName.toUpperCase()}` : ""
           }`,
@@ -44,9 +61,23 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
             item.images && item.images[0]?.imageUrl
               ? item.images[0].imageUrl
               : "/portfolio/original-automotive-mold.jpg",
+          images: item.images || [],
           description: item.description,
         }))
-      : t.portfolio.items;
+      : t.portfolio.items.map((item, idx) => ({
+          id: item.id || String(idx + 1).padStart(2, "0"),
+          title: item.title,
+          category: "MOLD MAKING",
+          material: "TOOL STEEL",
+          clientName: null,
+          spec: item.spec,
+          image: item.image,
+          images: [{ imageUrl: item.image, caption: item.title }],
+          description: item.spec,
+        }));
+
+  const [selectedItem, setSelectedItem] = useState<DetailItem | null>(null);
+  const [activeModalImage, setActiveModalImage] = useState<string | null>(null);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [cardsPerPage, setCardsPerPage] = useState(4);
@@ -279,9 +310,13 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
             {portfolioItems.map((item) => (
               <div
                 key={item.id}
-                className="w-[var(--card-w)] flex-shrink-0 relative group bg-[#FAFAFA] border border-zinc-200 hover:border-zinc-400 p-3 sm:p-4 rounded-none transition-colors duration-200"
+                onClick={() => {
+                  setSelectedItem(item);
+                  setActiveModalImage(item.image);
+                }}
+                className="w-[var(--card-w)] flex-shrink-0 relative group bg-[#FAFAFA] border border-zinc-200 hover:border-zinc-400 p-3 sm:p-4 rounded-none transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md"
               >
-                {/* 4 Corner Precision Registration Dots Tetap Berwarna Orange */}
+                {/* 4 Corner Precision Registration Dots */}
                 <span className="absolute top-2 left-2 w-1 h-1 bg-orange-600 z-20" />
                 <span className="absolute top-2 right-2 w-1 h-1 bg-orange-600 z-20" />
                 <span className="absolute bottom-2 left-2 w-1 h-1 bg-orange-600 z-20" />
@@ -294,7 +329,7 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
                     <img
                       src={item.image}
                       alt={item.title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
                     <Image
@@ -302,23 +337,56 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
                       alt={item.title}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      className="object-cover"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   )}
+
                   {/* Subtle Corner ID Pill */}
-                  <span className="absolute top-2.5 left-2.5 px-2 py-0.5 bg-black/70 backdrop-blur-sm text-[10px] font-mono text-white tracking-wider">
+                  <span className="absolute top-2.5 left-2.5 px-2 py-0.5 bg-black/70 backdrop-blur-sm text-[10px] font-mono text-white tracking-wider z-10">
                     {item.id}
                   </span>
+
+                  {/* Information Button on Top-Right of Card */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedItem(item);
+                      setActiveModalImage(item.image);
+                    }}
+                    className="absolute top-2.5 right-2.5 z-20 inline-flex items-center gap-1.5 px-2 py-1 bg-black/80 hover:bg-orange-600 text-white text-[10px] font-mono uppercase tracking-wider backdrop-blur-sm border border-white/20 hover:border-orange-500 transition-all duration-200 cursor-pointer shadow-lg active:scale-95"
+                    title={locale === "id" ? "Lihat Detail Portofolio" : "View Portfolio Details"}
+                    aria-label="Lihat Informasi Portofolio"
+                  >
+                    <Info className="w-3.5 h-3.5 text-orange-400" />
+                    <span>{locale === "id" ? "Detail" : "Info"}</span>
+                  </button>
                 </div>
 
                 {/* Content Area */}
-                <div className="pt-4 pb-2 px-1">
-                  <h3 className="text-base sm:text-lg font-medium text-zinc-950 tracking-tight leading-snug line-clamp-1 group-hover:text-orange-600 transition-colors">
-                    {item.title}
-                  </h3>
-                  <p className="text-[10px] sm:text-[11px] font-mono text-zinc-500 uppercase tracking-wider mt-1.5 line-clamp-1">
-                    {item.spec}
-                  </p>
+                <div className="flex items-start justify-between gap-2 pt-4 pb-2 px-1">
+                  <div className="min-w-0">
+                    <h3 className="text-base sm:text-lg font-medium text-zinc-950 tracking-tight leading-snug line-clamp-1 group-hover:text-orange-600 transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="text-[10px] sm:text-[11px] font-mono text-zinc-500 uppercase tracking-wider mt-1.5 line-clamp-1">
+                      {item.spec}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedItem(item);
+                      setActiveModalImage(item.image);
+                    }}
+                    className="shrink-0 p-1.5 text-zinc-400 hover:text-orange-600 hover:bg-orange-50 transition-colors cursor-pointer"
+                    title={locale === "id" ? "Lihat Informasi Detail" : "View Details"}
+                    aria-label="Informasi Portofolio"
+                  >
+                    <Info className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             ))}
@@ -392,6 +460,176 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
         </div>
 
       </div>
+
+      {/* Portfolio Detail Pop-up Modal */}
+      {selectedItem && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto"
+          onClick={() => setSelectedItem(null)}
+        >
+          <div
+            className="relative bg-[#141414] border border-[#2B2B2B] w-full max-w-2xl my-auto p-5 sm:p-7 space-y-5 shadow-2xl animate-in zoom-in-95 duration-200 text-zinc-100"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* 4 Precision Corner Registration Marks */}
+            <span className="absolute top-2 left-2 w-1.5 h-1.5 bg-orange-600 z-20" />
+            <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-orange-600 z-20" />
+            <span className="absolute bottom-2 left-2 w-1.5 h-1.5 bg-orange-600 z-20" />
+            <span className="absolute bottom-2 right-2 w-1.5 h-1.5 bg-orange-600 z-20" />
+
+            {/* Modal Header */}
+            <div className="flex items-start justify-between gap-4 pb-4 border-b border-[#262626]">
+              <div>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="px-2 py-0.5 bg-orange-600/20 border border-orange-500/40 text-orange-400 text-[10px] font-mono font-bold tracking-wider uppercase">
+                    #{selectedItem.id} {selectedItem.category}
+                  </span>
+                  <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">
+                    {locale === "id" ? "SPESIFIKASI MOLD PRESISI" : "PRECISION MOLD SPECS"}
+                  </span>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
+                  {selectedItem.title}
+                </h3>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedItem(null)}
+                className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors shrink-0 cursor-pointer"
+                title="Tutup"
+                aria-label="Tutup Modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Main Image Preview */}
+            <div className="relative aspect-[16/10] w-full overflow-hidden bg-zinc-900 border border-zinc-800">
+              {(activeModalImage || selectedItem.image).startsWith("data:") ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={activeModalImage || selectedItem.image}
+                  alt={selectedItem.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Image
+                  src={activeModalImage || selectedItem.image}
+                  alt={selectedItem.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 672px"
+                  className="object-cover"
+                />
+              )}
+            </div>
+
+            {/* Multi-Photo Thumbnails (if multiple photos exist) */}
+            {selectedItem.images && selectedItem.images.length > 1 && (
+              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                {selectedItem.images.map((img, idx) => {
+                  const isSelected = (activeModalImage || selectedItem.image) === img.imageUrl;
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setActiveModalImage(img.imageUrl)}
+                      className={`relative w-16 h-12 flex-shrink-0 border overflow-hidden transition-all cursor-pointer ${
+                        isSelected ? "border-orange-500 scale-105" : "border-zinc-800 opacity-70 hover:opacity-100"
+                      }`}
+                    >
+                      {img.imageUrl.startsWith("data:") ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={img.imageUrl} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <Image src={img.imageUrl} alt="" fill className="object-cover" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Technical Specifications Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
+              <div className="p-3 bg-[#1A1A1A] border border-[#2B2B2B]">
+                <span className="text-[10px] text-zinc-400 uppercase tracking-wider block mb-1">
+                  {locale === "id" ? "Bahan Baja Mold" : "Tool Steel Material"}
+                </span>
+                <span className="text-white font-semibold flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0" />
+                  {selectedItem.material || "Baja Perkakas Khusus"}
+                </span>
+              </div>
+
+              <div className="p-3 bg-[#1A1A1A] border border-[#2B2B2B]">
+                <span className="text-[10px] text-zinc-400 uppercase tracking-wider block mb-1">
+                  {locale === "id" ? "Sektor Industri" : "Industry Category"}
+                </span>
+                <span className="text-white font-semibold flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0" />
+                  {selectedItem.category}
+                </span>
+              </div>
+
+              <div className="p-3 bg-[#1A1A1A] border border-[#2B2B2B]">
+                <span className="text-[10px] text-zinc-400 uppercase tracking-wider block mb-1">
+                  {locale === "id" ? "Mitra / Klien" : "Client / Partner"}
+                </span>
+                <span className="text-white font-semibold flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                  {selectedItem.clientName || (locale === "id" ? "Mitra Industri (NDA)" : "Industrial Partner")}
+                </span>
+              </div>
+            </div>
+
+            {/* Technical Description Box */}
+            <div className="p-4 bg-[#1A1A1A] border border-[#2B2B2B] text-xs font-mono space-y-1.5">
+              <span className="text-[10px] text-orange-400 font-bold uppercase tracking-wider block">
+                {locale === "id" ? "Deskripsi & Karakteristik Cetakan:" : "Mold Technical Description:"}
+              </span>
+              <p className="text-zinc-300 leading-relaxed whitespace-pre-line">
+                {selectedItem.description}
+              </p>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-[#262626]">
+              <span className="text-[11px] font-mono text-zinc-400 hidden sm:inline">
+                {locale === "id" ? "Garansi siap uji coba cetak T0/T1" : "Production-ready trial guaranteed"}
+              </span>
+
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setSelectedItem(null)}
+                  className="flex-1 sm:flex-none px-4 py-2.5 bg-[#1A1A1A] border border-[#333333] hover:border-zinc-500 text-zinc-300 font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                >
+                  {locale === "id" ? "Tutup" : "Close"}
+                </button>
+
+                <a
+                  href="#kontak"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setSelectedItem(null);
+                    const elem = document.getElementById("kontak");
+                    if (elem) {
+                      elem.scrollIntoView({ behavior: "smooth" });
+                      window.history.pushState(null, "", "#kontak");
+                    }
+                  }}
+                  className="flex-1 sm:flex-none px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white font-mono text-xs font-semibold uppercase tracking-wider transition-colors text-center cursor-pointer shadow-lg shadow-orange-950/40"
+                >
+                  {locale === "id" ? "Konsultasi Cetakan Serupa" : "Consult Similar Mold"}
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
