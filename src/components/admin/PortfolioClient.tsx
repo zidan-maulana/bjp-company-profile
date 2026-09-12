@@ -25,6 +25,7 @@ import {
 import { uploadImageAction } from "@/actions/upload";
 import { PortfolioItemInput } from "@/lib/validations/portfolio";
 import AdminHeaderActions from "./AdminHeaderActions";
+import { useAdminLayout } from "./AdminLayoutContext";
 
 interface PortfolioImage {
   id?: string;
@@ -61,6 +62,7 @@ const CATEGORIES = [
 
 export default function PortfolioClient({ initialItems }: PortfolioClientProps) {
   const router = useRouter();
+  const { showToast } = useAdminLayout();
   const [items, setItems] = useState<PortfolioItem[]>(initialItems);
   const [activeCategory, setActiveCategory] = useState("ALL");
   const [modalOpen, setModalOpen] = useState(false);
@@ -191,26 +193,36 @@ export default function PortfolioClient({ initialItems }: PortfolioClientProps) 
           setItems((prev) =>
             prev.map((it) => (it.id === editingItem.id ? updated : it))
           );
-          setNotification({ text: `Portofolio "${title}" berhasil diperbarui.` });
+          const msg = `Portofolio "${title}" berhasil diperbarui.`;
+          setNotification({ text: msg });
+          showToast(msg, { title: "Portofolio Diperbarui", type: "success" });
           setModalOpen(false);
           router.refresh();
         } else {
-          setNotification({ text: res.message || "Gagal memperbarui portofolio.", isError: true });
+          const errMsg = res.message || "Gagal memperbarui portofolio.";
+          setNotification({ text: errMsg, isError: true });
+          showToast(errMsg, { title: "Gagal Memperbarui", isError: true });
         }
       } else {
         const res = await createPortfolioAction(payload);
         if (res.success && res.data) {
           setItems((prev) => [res.data as unknown as PortfolioItem, ...prev]);
-          setNotification({ text: "Portofolio cetakan baru berhasil ditambahkan." });
+          const msg = "Portofolio cetakan baru berhasil ditambahkan ke galeri.";
+          setNotification({ text: msg });
+          showToast(msg, { title: "Portofolio Ditambahkan", type: "success" });
           setModalOpen(false);
           router.refresh();
         } else {
-          setNotification({ text: res.message || "Gagal membuat portofolio.", isError: true });
+          const errMsg = res.message || "Gagal membuat portofolio.";
+          setNotification({ text: errMsg, isError: true });
+          showToast(errMsg, { title: "Gagal Menambahkan", isError: true });
         }
       }
     } catch (err) {
       console.error(err);
-      setNotification({ text: "Terjadi gangguan sistem saat menyimpan portofolio.", isError: true });
+      const errMsg = "Terjadi gangguan sistem saat menyimpan portofolio.";
+      setNotification({ text: errMsg, isError: true });
+      showToast(errMsg, { title: "Gangguan Sistem", isError: true });
     } finally {
       setIsLoading(false);
     }
@@ -222,14 +234,20 @@ export default function PortfolioClient({ initialItems }: PortfolioClientProps) 
         const res = await softDeletePortfolioAction(id);
         if (res.success) {
           setItems((prev) => prev.filter((item) => item.id !== id));
-          setNotification({ text: `Portofolio "${name}" berhasil dihapus.` });
+          const msg = `Portofolio "${name}" berhasil dihapus.`;
+          setNotification({ text: msg });
+          showToast(msg, { title: "Portofolio Dihapus", type: "info" });
           router.refresh();
         } else {
-          setNotification({ text: res.message || "Gagal menghapus.", isError: true });
+          const errMsg = res.message || "Gagal menghapus portofolio.";
+          setNotification({ text: errMsg, isError: true });
+          showToast(errMsg, { title: "Gagal Menghapus", isError: true });
         }
       } catch (err) {
         console.error(err);
-        setNotification({ text: "Gagal memproses penghapusan.", isError: true });
+        const errMsg = "Gagal memproses penghapusan portofolio.";
+        setNotification({ text: errMsg, isError: true });
+        showToast(errMsg, { title: "Gangguan Sistem", isError: true });
       }
     }
   };

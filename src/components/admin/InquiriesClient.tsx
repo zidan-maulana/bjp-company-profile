@@ -22,6 +22,7 @@ import {
   deleteInquiryAction,
 } from "@/actions/inquiry";
 import AdminHeaderActions from "./AdminHeaderActions";
+import { useAdminLayout } from "./AdminLayoutContext";
 
 interface Inquiry {
   id: string;
@@ -50,6 +51,7 @@ const SERVICE_OPTIONS = [
 
 export default function InquiriesClient({ initialInquiries }: InquiriesClientProps) {
   const router = useRouter();
+  const { showToast } = useAdminLayout();
   const [inquiries, setInquiries] = useState<Inquiry[]>(initialInquiries);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
@@ -129,15 +131,21 @@ export default function InquiriesClient({ initialInquiries }: InquiriesClientPro
           setSelectedInquiry(updated);
           setInternalNoteInput(updated.internalNote || "");
         }
-        setNotification({ text: `Permintaan dari "${editName}" berhasil diperbarui.` });
+        const msg = `Permintaan dari "${editName}" berhasil diperbarui.`;
+        setNotification({ text: msg });
+        showToast(msg, { title: "Data Prospek Diperbarui", type: "success" });
         setIsEditModalOpen(false);
         router.refresh();
       } else {
-        setNotification({ text: res.message || "Gagal memperbarui data permintaan.", isError: true });
+        const errMsg = res.message || "Gagal memperbarui data permintaan.";
+        setNotification({ text: errMsg, isError: true });
+        showToast(errMsg, { title: "Gagal Memperbarui", isError: true });
       }
     } catch (err) {
       console.error(err);
-      setNotification({ text: "Terjadi kesalahan saat memperbarui permintaan.", isError: true });
+      const errMsg = "Terjadi kesalahan saat memperbarui permintaan.";
+      setNotification({ text: errMsg, isError: true });
+      showToast(errMsg, { title: "Kesalahan Sistem", isError: true });
     } finally {
       setIsSavingEdit(false);
     }
@@ -159,14 +167,20 @@ export default function InquiriesClient({ initialInquiries }: InquiriesClientPro
           if (selectedInquiry?.id === id) {
             setSelectedInquiry(null);
           }
-          setNotification({ text: `Permintaan dari "${name}" berhasil dihapus.` });
+          const msg = `Permintaan masuk dari "${name}" berhasil dihapus.`;
+          setNotification({ text: msg });
+          showToast(msg, { title: "Data Dihapus", type: "info" });
           router.refresh();
         } else {
-          setNotification({ text: res.message || "Gagal menghapus permintaan.", isError: true });
+          const errMsg = res.message || "Gagal menghapus permintaan.";
+          setNotification({ text: errMsg, isError: true });
+          showToast(errMsg, { title: "Gagal Menghapus", isError: true });
         }
       } catch (err) {
         console.error(err);
-        setNotification({ text: "Terjadi kesalahan sistem saat menghapus.", isError: true });
+        const errMsg = "Terjadi kesalahan sistem saat menghapus.";
+        setNotification({ text: errMsg, isError: true });
+        showToast(errMsg, { title: "Kesalahan Sistem", isError: true });
       } finally {
         setIsDeleting(false);
       }
@@ -197,14 +211,21 @@ export default function InquiriesClient({ initialInquiries }: InquiriesClientPro
             internalNote: internalNoteInput,
           });
         }
-        setNotification({ text: "Status tindak lanjut berhasil diperbarui." });
+        const statusLabel = newStatus === "NEW" ? "BARU" : newStatus === "CONTACTED" ? "DIHUBUNGI" : "SELESAI";
+        const msg = `Status penanganan berhasil diubah menjadi "${statusLabel}".`;
+        setNotification({ text: msg });
+        showToast(msg, { title: "Status Diperbarui", type: "success" });
         router.refresh();
       } else {
-        setNotification({ text: res.message || "Gagal memperbarui status.", isError: true });
+        const errMsg = res.message || "Gagal memperbarui status.";
+        setNotification({ text: errMsg, isError: true });
+        showToast(errMsg, { title: "Gagal Memperbarui", isError: true });
       }
     } catch (err) {
       console.error(err);
-      setNotification({ text: "Terjadi kesalahan saat mengupdate status.", isError: true });
+      const errMsg = "Terjadi kesalahan saat mengupdate status.";
+      setNotification({ text: errMsg, isError: true });
+      showToast(errMsg, { title: "Kesalahan Sistem", isError: true });
     } finally {
       setIsUpdating(false);
     }
@@ -232,14 +253,20 @@ export default function InquiriesClient({ initialInquiries }: InquiriesClientPro
           ...selectedInquiry,
           internalNote: internalNoteInput,
         });
-        setNotification({ text: "Catatan internal tim berhasil disimpan." });
+        const msg = "Catatan internal tim berhasil disimpan.";
+        setNotification({ text: msg });
+        showToast(msg, { title: "Catatan Disimpan", type: "success" });
         router.refresh();
       } else {
-        setNotification({ text: res.message || "Gagal menyimpan catatan.", isError: true });
+        const errMsg = res.message || "Gagal menyimpan catatan.";
+        setNotification({ text: errMsg, isError: true });
+        showToast(errMsg, { title: "Gagal Menyimpan", isError: true });
       }
     } catch (err) {
       console.error(err);
-      setNotification({ text: "Terjadi kesalahan saat menyimpan catatan.", isError: true });
+      const errMsg = "Terjadi kesalahan saat menyimpan catatan.";
+      setNotification({ text: errMsg, isError: true });
+      showToast(errMsg, { title: "Kesalahan Sistem", isError: true });
     } finally {
       setIsUpdating(false);
     }

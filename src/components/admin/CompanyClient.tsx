@@ -26,6 +26,7 @@ import { updateCompanyInfoAction } from "@/actions/company";
 import { uploadImageAction } from "@/actions/upload";
 import { CompanyInfoData, DEFAULT_STANDARDS_CARDS, StandardCard } from "@/lib/data/types";
 import AdminHeaderActions from "./AdminHeaderActions";
+import { useAdminLayout } from "./AdminLayoutContext";
 
 interface CompanyClientProps {
   initialInfo: CompanyInfoData;
@@ -33,6 +34,7 @@ interface CompanyClientProps {
 
 export default function CompanyClient({ initialInfo }: CompanyClientProps) {
   const router = useRouter();
+  const { showToast } = useAdminLayout();
   const [activeTab, setActiveTab] = useState<"profile" | "hero" | "about" | "standards">("profile");
 
   // Parse standard cards safe
@@ -124,15 +126,28 @@ export default function CompanyClient({ initialInfo }: CompanyClientProps) {
       if (res.success && res.url) {
         setFormData((prev) => ({ ...prev, heroBgImage: res.url as string }));
         setNotification({ text: "Foto Hero background berhasil diunggah ke Cloudflare R2." });
+        showToast("Foto background Hero berhasil diunggah ke Cloudflare R2.", {
+          title: "Foto Berhasil Diunggah",
+          type: "success",
+        });
       } else {
+        const errorMsg = res.error || "Gagal mengunggah foto ke Cloudflare R2.";
         setNotification({
-          text: res.error || "Gagal mengunggah foto ke Cloudflare R2.",
+          text: errorMsg,
+          isError: true,
+        });
+        showToast(errorMsg, {
+          title: "Gagal Mengunggah Foto",
           isError: true,
         });
       }
     } catch (err) {
       console.error(err);
       setNotification({ text: "Terjadi gangguan saat mengunggah foto.", isError: true });
+      showToast("Terjadi gangguan saat mengunggah foto ke storage.", {
+        title: "Gangguan Sistem",
+        isError: true,
+      });
     } finally {
       setIsUploadingBg(false);
     }
@@ -140,6 +155,10 @@ export default function CompanyClient({ initialInfo }: CompanyClientProps) {
 
   const handleResetHeroBg = () => {
     setFormData((prev) => ({ ...prev, heroBgImage: "/mold-tool-close.jpg" }));
+    showToast("Foto background dikembalikan ke foto bawaan. Klik 'Simpan Perubahan' untuk menerapkan.", {
+      title: "Background Direset",
+      type: "info",
+    });
   };
 
   // Standards Card Handlers
@@ -172,14 +191,29 @@ export default function CompanyClient({ initialInfo }: CompanyClientProps) {
 
       const res = await updateCompanyInfoAction(payload);
       if (res.success) {
-        setNotification({ text: "Seluruh konten website & profil berhasil disimpan dan diperbarui di landing page." });
+        const successMsg = "Seluruh konten website & profil perusahaan berhasil disimpan dan diperbarui di landing page.";
+        setNotification({ text: successMsg });
+        showToast(successMsg, {
+          title: "Konten Berhasil Disimpan",
+          type: "success",
+        });
         router.refresh();
       } else {
-        setNotification({ text: res.message || "Gagal menyimpan perubahan.", isError: true });
+        const errorMsg = res.message || "Gagal menyimpan perubahan konten.";
+        setNotification({ text: errorMsg, isError: true });
+        showToast(errorMsg, {
+          title: "Gagal Menyimpan",
+          isError: true,
+        });
       }
     } catch (err) {
       console.error(err);
-      setNotification({ text: "Terjadi kesalahan saat menyimpan data.", isError: true });
+      const errMsg = "Terjadi kesalahan saat menyimpan data.";
+      setNotification({ text: errMsg, isError: true });
+      showToast(errMsg, {
+        title: "Kesalahan Sistem",
+        isError: true,
+      });
     } finally {
       setIsLoading(false);
     }

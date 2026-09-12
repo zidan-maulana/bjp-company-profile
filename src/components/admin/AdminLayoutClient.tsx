@@ -18,8 +18,8 @@ import {
 } from "lucide-react";
 import { logoutAdminAction } from "@/actions/auth";
 import ChangePasswordModal from "@/components/admin/ChangePasswordModal";
-
-import { AdminLayoutContext, AdminUser } from "./AdminLayoutContext";
+import ToastNotification, { ToastItem } from "./ToastNotification";
+import { AdminLayoutContext, AdminUser, ToastOptions } from "./AdminLayoutContext";
 
 interface AdminLayoutClientProps {
   children: React.ReactNode;
@@ -65,6 +65,23 @@ export default function AdminLayoutClient({ children, user }: AdminLayoutClientP
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+
+  const showToast = (text: string, options?: ToastOptions) => {
+    const newToast: ToastItem = {
+      id: `toast_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      text,
+      title: options?.title,
+      isError: options?.isError,
+      type: options?.type || (options?.isError ? "error" : "success"),
+      duration: options?.duration || 4500,
+    };
+    setToasts((prev) => [...prev, newToast]);
+  };
+
+  const dismissToast = (id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
 
   const handleLogout = async () => {
     if (confirm("Apakah Anda yakin ingin keluar dari Portal Admin?")) {
@@ -87,6 +104,7 @@ export default function AdminLayoutClient({ children, user }: AdminLayoutClientP
         openChangePassword: () => setChangePasswordOpen(true),
         handleLogout,
         isLoggingOut,
+        showToast,
       }}
     >
       <div className="min-h-screen bg-[#0D0D0D] text-zinc-100 flex flex-col selection:bg-orange-600 selection:text-white">
@@ -317,6 +335,9 @@ export default function AdminLayoutClient({ children, user }: AdminLayoutClientP
           onClose={() => setChangePasswordOpen(false)}
           defaultEmail={user?.email || "admin@barunajayaplastik.com"}
         />
+
+        {/* Global Toast / Pop-up Notification Container */}
+        <ToastNotification toasts={toasts} onDismiss={dismissToast} />
       </div>
     </AdminLayoutContext.Provider>
   );

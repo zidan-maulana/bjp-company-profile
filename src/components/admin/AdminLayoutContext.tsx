@@ -8,11 +8,19 @@ export interface AdminUser {
   role?: string;
 }
 
+export interface ToastOptions {
+  title?: string;
+  isError?: boolean;
+  type?: "success" | "error" | "info";
+  duration?: number;
+}
+
 export interface AdminLayoutContextType {
   user: AdminUser | null;
   openChangePassword: () => void;
   handleLogout: () => void;
   isLoggingOut: boolean;
+  showToast: (text: string, options?: ToastOptions) => void;
 }
 
 export const AdminLayoutContext = createContext<AdminLayoutContextType | null>(null);

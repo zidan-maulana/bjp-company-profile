@@ -7,6 +7,7 @@ import {
   verifyPasswordResetOtpAction,
   resetPasswordWithTokenAction,
 } from "@/actions/auth";
+import { useAdminLayout } from "./AdminLayoutContext";
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
@@ -21,8 +22,9 @@ export default function ChangePasswordModal({
   onClose,
   defaultEmail = "admin@barunajayaplastik.com",
 }: ChangePasswordModalProps) {
+  const { showToast } = useAdminLayout();
   const [step, setStep] = useState<ModalStep>("CONFIRM_EMAIL");
-  const [email, setEmail] = useState(defaultEmail);
+  const [email, setEmail] = useState(defaultEmail || "admin@barunajayaplastik.com");
   const [otp, setOtp] = useState("");
   const [resetToken, setResetToken] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -158,9 +160,13 @@ export default function ChangePasswordModal({
 
       if (res.success) {
         setSuccessMessage(res.message || "Kata sandi berhasil diperbarui!");
+        showToast("Kata sandi akun administrator berhasil diperbarui.", {
+          title: "Kata Sandi Diperbarui",
+          type: "success",
+        });
         setTimeout(() => {
           handleClose();
-        }, 1500);
+        }, 1200);
       } else {
         setErrorMessage(res.message || "Gagal memperbarui kata sandi.");
       }

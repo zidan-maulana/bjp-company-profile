@@ -21,6 +21,7 @@ import {
 } from "@/actions/services";
 import { ServiceInput } from "@/lib/validations/service";
 import AdminHeaderActions from "./AdminHeaderActions";
+import { useAdminLayout } from "./AdminLayoutContext";
 
 interface Service {
   id: string;
@@ -40,6 +41,7 @@ interface ServicesClientProps {
 
 export default function ServicesClient({ initialServices }: ServicesClientProps) {
   const router = useRouter();
+  const { showToast } = useAdminLayout();
   const [services, setServices] = useState<Service[]>(initialServices);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
@@ -113,26 +115,36 @@ export default function ServicesClient({ initialServices }: ServicesClientProps)
           setServices((prev) =>
             prev.map((s) => (s.id === editingService.id ? (res.data as Service) : s))
           );
-          setNotification({ text: "Layanan berhasil diperbarui." });
+          const msg = `Layanan "${payload.title}" berhasil diperbarui.`;
+          setNotification({ text: msg });
+          showToast(msg, { title: "Layanan Diperbarui", type: "success" });
           setModalOpen(false);
           router.refresh();
         } else {
-          setNotification({ text: res.message || "Gagal mengupdate layanan.", isError: true });
+          const errMsg = res.message || "Gagal mengupdate layanan.";
+          setNotification({ text: errMsg, isError: true });
+          showToast(errMsg, { title: "Gagal Mengupdate", isError: true });
         }
       } else {
         const res = await createServiceAction(payload);
         if (res.success && res.data) {
           setServices((prev) => [...prev, res.data as Service]);
-          setNotification({ text: "Layanan baru berhasil ditambahkan." });
+          const msg = `Layanan baru "${payload.title}" berhasil ditambahkan.`;
+          setNotification({ text: msg });
+          showToast(msg, { title: "Layanan Ditambahkan", type: "success" });
           setModalOpen(false);
           router.refresh();
         } else {
-          setNotification({ text: res.message || "Gagal menambah layanan.", isError: true });
+          const errMsg = res.message || "Gagal menambah layanan.";
+          setNotification({ text: errMsg, isError: true });
+          showToast(errMsg, { title: "Gagal Menambah Layanan", isError: true });
         }
       }
     } catch (err) {
       console.error(err);
-      setNotification({ text: "Terjadi kesalahan sistem.", isError: true });
+      const errMsg = "Terjadi kesalahan sistem saat memproses layanan.";
+      setNotification({ text: errMsg, isError: true });
+      showToast(errMsg, { title: "Kesalahan Sistem", isError: true });
     } finally {
       setIsLoading(false);
     }
@@ -144,14 +156,20 @@ export default function ServicesClient({ initialServices }: ServicesClientProps)
         const res = await softDeleteServiceAction(id);
         if (res.success) {
           setServices((prev) => prev.filter((s) => s.id !== id));
-          setNotification({ text: `Layanan "${name}" berhasil dihapus.` });
+          const msg = `Layanan "${name}" berhasil dihapus dari katalog.`;
+          setNotification({ text: msg });
+          showToast(msg, { title: "Layanan Dihapus", type: "info" });
           router.refresh();
         } else {
-          setNotification({ text: res.message || "Gagal menghapus.", isError: true });
+          const errMsg = res.message || "Gagal menghapus layanan.";
+          setNotification({ text: errMsg, isError: true });
+          showToast(errMsg, { title: "Gagal Menghapus", isError: true });
         }
       } catch (err) {
         console.error(err);
-        setNotification({ text: "Terjadi kesalahan saat menghapus layanan.", isError: true });
+        const errMsg = "Terjadi kesalahan saat menghapus layanan.";
+        setNotification({ text: errMsg, isError: true });
+        showToast(errMsg, { title: "Kesalahan Sistem", isError: true });
       }
     }
   };
