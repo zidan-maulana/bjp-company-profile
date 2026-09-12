@@ -427,16 +427,10 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
         {/* Bottom Navigation: Pagination Counter & Arrow Buttons (Single-row mobile responsive) */}
         <div className="flex flex-row items-center justify-between gap-4 mt-6 sm:mt-5">
           
-          {/* Left: Page Counter & Precision Indicator Dash */}
+          {/* Left: Page Counter */}
           <div className="flex items-center gap-2.5 sm:gap-4">
             <span className="text-[11px] sm:text-xs font-mono font-medium text-zinc-500 tracking-wider">
               [ {String(currentPage).padStart(2, "0")} / {String(totalPages).padStart(2, "0")} ]
-            </span>
-            <span className="hidden sm:inline-block w-8 sm:w-12 h-px bg-zinc-300" />
-            <span className="text-[10px] sm:text-[11px] font-mono text-zinc-400 uppercase tracking-widest hidden md:inline">
-              {locale === "id"
-                ? "PILIH PRODUK UNTUK RINCIAN SPESIFIKASI TEKNIS"
-                : "SELECT PRODUCT FOR DETAILED TECHNICAL SPECIFICATIONS"}
             </span>
           </div>
 
