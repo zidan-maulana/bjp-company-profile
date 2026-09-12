@@ -10,21 +10,6 @@ export function getSiteUrl(): string {
     return customSiteUrl.replace(/\/$/, "");
   }
 
-  // 2. Cek APP_URL bawaan jika bukan localhost
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-  if (appUrl && !appUrl.includes("localhost")) {
-    return appUrl.replace(/\/$/, "");
-  }
-
-  // 3. Cek domain produksi Vercel otomatis
-  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
-    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
-  }
-
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-
-  // 4. Fallback domain live produksi terpercaya
+  // 2. Domain resmi yang didaftarkan di Google Search Console
   return "https://barunajayaplastik.vercel.app";
 }
