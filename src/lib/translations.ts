@@ -55,6 +55,7 @@ export interface Translations {
       subtitle: string;
       desc: string;
       capabilities: string[];
+      maxCapacity?: string;
     }[];
   };
   standards: {

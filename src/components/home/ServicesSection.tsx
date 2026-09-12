@@ -18,6 +18,7 @@ interface DisplayServiceItem {
   subtitle: string;
   desc: string;
   capabilities: string[];
+  maxCapacity?: string | null;
 }
 
 export default function ServicesSection({ initialServices }: ServicesSectionProps) {
@@ -27,16 +28,25 @@ export default function ServicesSection({ initialServices }: ServicesSectionProp
   const listRef = useParallax<HTMLDivElement>(0.02);
 
   const displayItems: DisplayServiceItem[] =
-    locale === "id" && initialServices && initialServices.length > 0
-      ? initialServices.map((s, idx) => ({
-          id: s.id,
-          number: s.number || String(idx + 1).padStart(2, "0"),
-          title: s.title,
-          subtitle: s.subtitle || s.shortDesc || "PRECISION MOLD SERVICE",
-          desc: s.fullDesc || s.desc || s.shortDesc,
-          capabilities: s.capabilities || s.materials || [],
-        }))
-      : t.services.items;
+    initialServices && initialServices.length > 0
+      ? initialServices.map((s, idx) => {
+          const enTranslation =
+            locale === "en" ? t.services.items[idx] : null;
+
+          return {
+            id: s.id,
+            number: s.number || String(idx + 1).padStart(2, "0"),
+            title: enTranslation?.title || s.title,
+            subtitle: enTranslation?.subtitle || s.subtitle || s.shortDesc || "PRECISION MOLD SERVICE",
+            desc: enTranslation?.desc || s.fullDesc || s.desc || s.shortDesc,
+            capabilities: (s.capabilities && s.capabilities.length > 0) ? s.capabilities : (s.materials || []),
+            maxCapacity: s.maxCapacity || null,
+          };
+        })
+      : t.services.items.map((item) => ({
+          ...item,
+          maxCapacity: (item as any).maxCapacity || null,
+        }));
 
   // Default to first card open when website is opened, toggled strictly by click
   const [activeId, setActiveId] = useState<string | null>(displayItems[0]?.id || "01");
@@ -157,7 +167,7 @@ export default function ServicesSection({ initialServices }: ServicesSectionProp
                           {item.number || item.id}
                         </span>
 
-                        {/* Title & English Subtitle */}
+                        {/* Title, Subtitle & Capacity Badge */}
                         <div>
                           <h3
                             className={`text-lg sm:text-2xl font-medium tracking-tight transition-colors duration-200 ${
@@ -168,9 +178,26 @@ export default function ServicesSection({ initialServices }: ServicesSectionProp
                           >
                             {item.title}
                           </h3>
-                          <p className="text-[11px] sm:text-xs font-mono tracking-wide mt-0.5 sm:mt-1 uppercase text-zinc-400">
-                            {item.subtitle}
-                          </p>
+                          <div className="flex flex-wrap items-center gap-2 mt-0.5 sm:mt-1">
+                            <p className="text-[11px] sm:text-xs font-mono tracking-wide uppercase text-zinc-400">
+                              {item.subtitle}
+                            </p>
+                            {item.maxCapacity && (
+                              <span
+                                className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[9.5px] sm:text-[10.5px] font-mono tracking-wider uppercase border transition-colors ${
+                                  isActive
+                                    ? "bg-orange-950/60 border-orange-500/40 text-orange-400"
+                                    : "bg-zinc-100 border-zinc-200 text-zinc-600 group-hover:border-orange-300 group-hover:text-orange-600"
+                                }`}
+                              >
+                                <span className="w-1 h-1 rounded-full bg-orange-500 shrink-0" />
+                                <span>
+                                  {locale === "id" ? "Kapasitas:" : "Capacity:"}{" "}
+                                  <strong className="font-semibold">{item.maxCapacity}</strong>
+                                </span>
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
 
@@ -204,7 +231,7 @@ export default function ServicesSection({ initialServices }: ServicesSectionProp
                         {item.desc}
                       </p>
 
-                      {/* Smooth Expandable Capabilities Tags (CSS Grid Rows Animation) */}
+                      {/* Smooth Expandable Capabilities & Capacity (CSS Grid Rows Animation) */}
                       <div
                         className={`grid transition-all duration-300 ease-out ${
                           isActive
@@ -213,13 +240,29 @@ export default function ServicesSection({ initialServices }: ServicesSectionProp
                         }`}
                       >
                         <div className="overflow-hidden">
+                          {/* Dedicated Max Capacity Highlight Box */}
+                          {item.maxCapacity && (
+                            <div className="mb-3.5 p-2.5 sm:p-3 bg-zinc-900 border border-zinc-800 flex flex-wrap items-center justify-between gap-2">
+                              <div className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse shrink-0" />
+                                <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-zinc-400">
+                                  {locale === "id" ? "Kapasitas Maksimal Mesin / Mold:" : "Max Machine / Mold Capacity:"}
+                                </span>
+                              </div>
+                              <span className="text-[11px] sm:text-xs font-mono font-bold text-orange-400 px-2.5 py-0.5 bg-orange-950/40 border border-orange-500/30">
+                                {item.maxCapacity}
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Capabilities / Materials Tags */}
                           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                             {item.capabilities.map((cap, idx) => (
                               <span
                                 key={idx}
                                 className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-zinc-900 border border-zinc-800 text-[10px] sm:text-[11px] font-mono text-zinc-300"
                               >
-                                <span className="w-1 h-1 bg-orange-500" />
+                                <span className="w-1 h-1 bg-orange-500 shrink-0" />
                                 <span>{cap}</span>
                               </span>
                             ))}
