@@ -45,7 +45,7 @@ export async function isDatabaseOnline(): Promise<boolean> {
     try {
       const probePromise = db.$queryRawUnsafe("SELECT 1");
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Database probe timeout")), 2500)
+        setTimeout(() => reject(new Error("Database probe timeout")), 6000)
       );
 
       await Promise.race([probePromise, timeoutPromise]);

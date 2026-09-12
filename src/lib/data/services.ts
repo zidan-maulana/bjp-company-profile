@@ -37,7 +37,7 @@ export const DEFAULT_SERVICES: ServiceItemData[] = [
       "Hot & Cold Runner System",
       "Multi-Cavity Presisi Tinggi",
     ],
-    maxCapacity: null,
+    maxCapacity: "Lebar 50cm x Panjang 80cm",
     imageUrl: null,
     orderIndex: 1,
   },
@@ -60,7 +60,7 @@ export const DEFAULT_SERVICES: ServiceItemData[] = [
       "Saluran Pendingin Baffle Cepat",
       "Finishing Cavity Mirror Polish",
     ],
-    maxCapacity: null,
+    maxCapacity: "Lebar 50cm x Panjang 80cm",
     imageUrl: null,
     orderIndex: 2,
   },
@@ -83,7 +83,7 @@ export const DEFAULT_SERVICES: ServiceItemData[] = [
       "Wire Cut & Sinker EDM Presisi",
       "Inspeksi Kekerasan HRC 48-52",
     ],
-    maxCapacity: null,
+    maxCapacity: "Lebar 50cm x Panjang 80cm",
     imageUrl: null,
     orderIndex: 3,
   },
@@ -106,7 +106,7 @@ export const DEFAULT_SERVICES: ServiceItemData[] = [
       "Rekondisi Parting Line Aus",
       "Modifikasi Core & Cavity",
     ],
-    maxCapacity: null,
+    maxCapacity: "Lebar 50cm x Panjang 80cm",
     imageUrl: null,
     orderIndex: 4,
   },
@@ -159,38 +159,40 @@ export const DEFAULT_SERVICES: ServiceItemData[] = [
 ];
 
 export async function getActiveServices(): Promise<ServiceItemData[]> {
-  if (await isDatabaseOnline()) {
-    try {
-      const services = await db.service.findMany({
-        where: { deletedAt: null },
-        orderBy: { orderIndex: "asc" },
-      });
+  try {
+    const services = await db.service.findMany({
+      where: { deletedAt: null },
+      orderBy: { orderIndex: "asc" },
+    });
 
-      if (services && services.length > 0) {
-        return services.map((s: any, idx: number) => ({
-          id: s.id,
-          slug: s.slug,
-          number: String(idx + 1).padStart(2, "0"),
-          title: s.title,
-          subtitle: s.shortDesc || "PRECISION MOLD SERVICE",
-          shortDesc: s.shortDesc,
-          desc: s.fullDesc || s.shortDesc,
-          fullDesc: s.fullDesc,
-          materials: s.materials,
-          capabilities: s.materials,
-          maxCapacity: s.maxCapacity,
-          imageUrl: s.imageUrl,
-          orderIndex: s.orderIndex,
-        }));
-      }
-    } catch {
-      // Database connection error / offline
+    if (services && services.length > 0) {
+      return services.map((s: any, idx: number) => ({
+        id: s.id,
+        slug: s.slug,
+        number: String(idx + 1).padStart(2, "0"),
+        title: s.title,
+        subtitle: s.shortDesc || "PRECISION MOLD SERVICE",
+        shortDesc: s.shortDesc,
+        desc: s.fullDesc || s.shortDesc,
+        fullDesc: s.fullDesc,
+        materials: s.materials,
+        capabilities: s.materials,
+        maxCapacity: s.maxCapacity || "Lebar 50cm x Panjang 80cm",
+        imageUrl: s.imageUrl,
+        orderIndex: s.orderIndex,
+      }));
     }
+  } catch {
+    // Database connection error / offline
   }
 
-  // Read from local JSON storage
+  // Read from local JSON storage or default
   const local = await readLocalData<ServiceItemData[]>("services.json", DEFAULT_SERVICES);
-  return local && local.length > 0 ? local : DEFAULT_SERVICES;
+  const items = local && local.length > 0 ? local : DEFAULT_SERVICES;
+  return items.map((item) => ({
+    ...item,
+    maxCapacity: item.maxCapacity || "Lebar 50cm x Panjang 80cm",
+  }));
 }
 
 export async function saveServicesLocal(services: ServiceItemData[]): Promise<void> {

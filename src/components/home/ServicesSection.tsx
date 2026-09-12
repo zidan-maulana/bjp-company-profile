@@ -40,12 +40,12 @@ export default function ServicesSection({ initialServices }: ServicesSectionProp
             subtitle: enTranslation?.subtitle || s.subtitle || s.shortDesc || "PRECISION MOLD SERVICE",
             desc: enTranslation?.desc || s.fullDesc || s.desc || s.shortDesc,
             capabilities: (s.capabilities && s.capabilities.length > 0) ? s.capabilities : (s.materials || []),
-            maxCapacity: s.maxCapacity || null,
+            maxCapacity: s.maxCapacity || "Lebar 50cm x Panjang 80cm",
           };
         })
       : t.services.items.map((item) => ({
           ...item,
-          maxCapacity: (item as any).maxCapacity || null,
+          maxCapacity: (item as any).maxCapacity || "Lebar 50cm x Panjang 80cm",
         }));
 
   // Default to first card open on desktop, but closed initially on mobile
