@@ -411,36 +411,13 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
                 </div>
 
                 {/* Content Area */}
-                <div className="flex items-start justify-between gap-2 pt-4 pb-2 px-1">
-                  <div className="min-w-0">
-                    <h3 className="text-base sm:text-lg font-medium text-zinc-950 tracking-tight leading-snug line-clamp-1 group-hover:text-orange-600 transition-colors">
-                      {item.title}
-                    </h3>
-                    <p className="text-[10px] sm:text-[11px] font-mono text-zinc-500 uppercase tracking-wider mt-1.5 line-clamp-1">
-                      {item.spec}
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    onPointerDown={(e) => {
-                      e.stopPropagation();
-                    }}
-                    onMouseDown={(e) => {
-                      e.stopPropagation();
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      setSelectedItem(item);
-                      setActiveModalImage(item.image);
-                    }}
-                    className="shrink-0 p-1.5 text-zinc-400 hover:text-orange-600 transition-colors cursor-pointer"
-                    title={locale === "id" ? "Lihat Informasi Detail" : "View Details"}
-                    aria-label="Informasi Portofolio"
-                  >
-                    <Info className="w-4 h-4" />
-                  </button>
+                <div className="pt-4 pb-2 px-1">
+                  <h3 className="text-base sm:text-lg font-medium text-zinc-950 tracking-tight leading-snug line-clamp-1 group-hover:text-orange-600 transition-colors">
+                    {item.title}
+                  </h3>
+                  <p className="text-[10px] sm:text-[11px] font-mono text-zinc-500 uppercase tracking-wider mt-1.5 line-clamp-1">
+                    {item.spec}
+                  </p>
                 </div>
               </div>
             ))}
