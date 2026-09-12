@@ -434,7 +434,9 @@ export default function PortfolioSection({ initialItems }: PortfolioSectionProps
             </span>
             <span className="hidden sm:inline-block w-8 sm:w-12 h-px bg-zinc-300" />
             <span className="text-[10px] sm:text-[11px] font-mono text-zinc-400 uppercase tracking-widest hidden md:inline">
-              {locale === "id" ? "KLIK KARTU / BUTTON DETAIL UNTUK SPESIFIKASI LENGKAP" : "CLICK CARD / DETAIL BUTTON FOR FULL SPECS"}
+              {locale === "id"
+                ? "PILIH PRODUK UNTUK RINCIAN SPESIFIKASI TEKNIS"
+                : "SELECT PRODUCT FOR DETAILED TECHNICAL SPECIFICATIONS"}
             </span>
           </div>
 
