@@ -97,7 +97,9 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+    google:
+      process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ||
+      "google5e35570dba6df9e1",
     yandex: process.env.NEXT_PUBLIC_YANDEX_VERIFICATION,
     other: {
       "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION || "",

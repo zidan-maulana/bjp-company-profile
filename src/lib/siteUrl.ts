@@ -26,5 +26,5 @@ export function getSiteUrl(): string {
   }
 
   // 4. Fallback domain live produksi terpercaya
-  return "https://bjp-company-profile.vercel.app";
+  return "https://barunajayaplastik.vercel.app";
 }
