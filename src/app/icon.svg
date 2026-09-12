@@ -1,9 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="7" fill="#0B0F17" stroke="#28303C" stroke-width="0.75" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
   <g transform="translate(0, 3.5)">
     <!-- Top Slanted Shape in Vibrant Orange -->
-    <polygon points="10,0 28,0 20,11 2,11" fill="#F97316" />
-    <!-- Bottom Slanted Shape in Clean White -->
-    <polygon points="12,14 30,14 22,25 4,25" fill="#FFFFFF" />
+    <polygon points="10,0 28,0 20,11 2,11" fill="#EA580C" />
+    <!-- Bottom Slanted Shape in Clean White with subtle edge for light theme visibility -->
+    <polygon points="12,14 30,14 22,25 4,25" fill="#FFFFFF" stroke="#374151" stroke-width="0.75" stroke-linejoin="round" />
   </g>
 </svg>
