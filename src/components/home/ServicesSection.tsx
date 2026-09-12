@@ -218,7 +218,9 @@ export default function ServicesSection({ initialServices }: ServicesSectionProp
                     >
                       <p
                         className={`text-xs sm:text-[13px] leading-relaxed transition-colors duration-200 ${
-                          isActive ? "text-zinc-300" : "text-zinc-600"
+                          isActive
+                            ? "text-zinc-300 block"
+                            : "text-zinc-600 hidden lg:block"
                         }`}
                       >
                         {item.desc}
