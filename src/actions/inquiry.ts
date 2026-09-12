@@ -1,7 +1,15 @@
 "use server";
 
-import { db } from "@/lib/db";
-import { createInquirySchema, updateInquiryStatusSchema, CreateInquiryInput, UpdateInquiryStatusInput } from "@/lib/validations/inquiry";
+import { db, isDatabaseOnline } from "@/lib/db";
+import { revalidatePath } from "next/cache";
+import {
+  createInquirySchema,
+  updateInquiryStatusSchema,
+  updateInquirySchema,
+  CreateInquiryInput,
+  UpdateInquiryStatusInput,
+  UpdateInquiryInput,
+} from "@/lib/validations/inquiry";
 import { sendInquiryNotificationEmail } from "@/lib/email";
 
 export async function submitInquiryAction(input: CreateInquiryInput) {
@@ -80,9 +88,61 @@ export async function updateInquiryStatusAction(input: UpdateInquiryStatusInput)
         internalNote: validated.data.internalNote,
       },
     });
+    revalidatePath("/admin/inquiries");
     return { success: true, data: updated, message: "Status inquiry berhasil diperbarui." };
   } catch (error) {
     console.error("Error updating inquiry status:", error);
     return { success: false, message: "Gagal memperbarui status inquiry." };
   }
 }
+
+export async function updateInquiryAction(input: UpdateInquiryInput) {
+  const validated = updateInquirySchema.safeParse(input);
+
+  if (!validated.success) {
+    return {
+      success: false,
+      errors: validated.error.flatten().fieldErrors,
+      message: "Data edit permintaan tidak valid.",
+    };
+  }
+
+  try {
+    const updated = await db.inquiry.update({
+      where: { id: validated.data.id },
+      data: {
+        name: validated.data.name,
+        companyName: validated.data.companyName || null,
+        email: validated.data.email,
+        phone: validated.data.phone,
+        serviceType: validated.data.serviceType || null,
+        message: validated.data.message,
+        status: validated.data.status,
+        internalNote: validated.data.internalNote || null,
+      },
+    });
+    revalidatePath("/admin/inquiries");
+    return { success: true, data: updated, message: "Data permintaan berhasil diperbarui." };
+  } catch (error) {
+    console.error("Error updating inquiry:", error);
+    return { success: false, message: "Gagal memperbarui data permintaan." };
+  }
+}
+
+export async function deleteInquiryAction(id: string) {
+  if (!id) {
+    return { success: false, message: "ID permintaan tidak valid." };
+  }
+
+  try {
+    await db.inquiry.delete({
+      where: { id },
+    });
+    revalidatePath("/admin/inquiries");
+    return { success: true, message: "Permintaan masuk berhasil dihapus." };
+  } catch (error) {
+    console.error("Error deleting inquiry:", error);
+    return { success: false, message: "Gagal menghapus permintaan masuk." };
+  }
+}
+
